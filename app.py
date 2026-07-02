@@ -315,7 +315,7 @@ def get_detailed_menus():
 def calculate_amount(plan_tier, protein_upgrade):
     """Calculates weekly subscription cost."""
     base = 50.00 if plan_tier == 'Hot' else 55.00
-    upgrade = 15.00 if protein_upgrade else 0.00
+    upgrade = 20.00 if protein_upgrade else 0.00
     return base + upgrade
 
 # -------------------------------------------------------------
