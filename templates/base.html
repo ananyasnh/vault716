@@ -107,8 +107,8 @@
                         <a href="{{ url_for('dashboard') }}" class="text-xs uppercase tracking-widest font-medium text-neutral-400 hover:text-white transition-colors">Dashboard</a>
                         <a href="{{ url_for('logout') }}" class="text-xs uppercase tracking-widest font-medium text-neutral-500 hover:text-rose-400 transition-colors">Log Out</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="text-xs uppercase tracking-widest font-medium text-neutral-400 hover:text-white transition-colors">Member Login</a>
-                        <a href="{{ url_for('register') }}" class="inline-flex items-center justify-center px-5 py-2.5 border border-amber-500/20 rounded-xl text-xs uppercase tracking-wider font-semibold text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all">Apply Now</a>
+                        <a href="{{ url_for('login') }}" class="text-xs uppercase tracking-widest font-medium text-neutral-400 hover:text-white transition-colors">Sign In</a>
+                        <a href="{{ url_for('register') }}" class="inline-flex items-center justify-center px-5 py-2.5 border border-amber-500/20 rounded-xl text-xs uppercase tracking-wider font-semibold text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all">Sign Up</a>
                     {% endif %}
                 </nav>
 
@@ -130,8 +130,8 @@
                 <a href="{{ url_for('dashboard') }}" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900">Dashboard</a>
                 <a href="{{ url_for('logout') }}" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-neutral-900">Log Out</a>
             {% else %}
-                <a href="{{ url_for('login') }}" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900">Member Login</a>
-                <a href="{{ url_for('register') }}" class="block text-center w-full px-3 py-3 mt-2 rounded-xl text-sm font-semibold text-neutral-950 bg-amber-500 hover:bg-amber-400 transition-colors">Apply Now</a>
+                <a href="{{ url_for('login') }}" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900">Sign In</a>
+                <a href="{{ url_for('register') }}" class="block text-center w-full px-3 py-3 mt-2 rounded-xl text-sm font-semibold text-neutral-950 bg-amber-500 hover:bg-amber-400 transition-colors">Sign Up</a>
             {% endif %}
         </div>
     </header>

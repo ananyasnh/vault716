@@ -62,8 +62,8 @@
                 {% if session.get('user_id') %}
                     <a href="{{ url_for('dashboard') }}" class="rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-neutral-950 shadow-lg hover:shadow-amber-500/10 btn-glow transition-all font-display">Go to Member Dashboard</a>
                 {% else %}
-                    <a href="{{ url_for('register') }}" class="rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-neutral-950 shadow-lg hover:shadow-amber-500/10 btn-glow transition-all font-display">Apply Now</a>
-                    <a href="{{ url_for('login') }}" class="text-xs uppercase tracking-widest font-semibold text-neutral-300 hover:text-white transition-colors">Member Login <span aria-hidden="true">→</span></a>
+                    <a href="{{ url_for('register') }}" class="rounded-xl bg-amber-500 hover:bg-amber-400 px-6 py-3.5 text-xs font-bold uppercase tracking-widest text-neutral-950 shadow-lg hover:shadow-amber-500/10 btn-glow transition-all font-display">Sign Up</a>
+                    <a href="{{ url_for('login') }}" class="text-xs uppercase tracking-widest font-semibold text-neutral-300 hover:text-white transition-colors">Sign In <span aria-hidden="true">→</span></a>
                 {% endif %}
             </div>
         </div>
