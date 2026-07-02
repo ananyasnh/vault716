@@ -52,6 +52,24 @@
     from { opacity: 0.6; }
     to   { opacity: 1; }
 }
+/* animated fallback gradient (always visible beneath videos) */
+.vbg-fallback {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+        #0a0a0a 0%,
+        #1a0f00 25%,
+        #0d0800 50%,
+        #120a00 75%,
+        #0a0a0a 100%);
+    background-size: 400% 400%;
+    animation: fallback-pan 12s ease infinite;
+}
+@keyframes fallback-pan {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 </style>
 {% endblock %}
 
@@ -59,21 +77,28 @@
 
     <!-- ── Video Background ──────────────────────────────── -->
     <div class="vbg-wrap" aria-hidden="true">
-        <!-- Clip 1: sizzling steak close-up -->
-        <video id="vbg-0" autoplay muted loop playsinline preload="none"
-            src="https://videos.pexels.com/video-files/5945871/5945871-sd_960_506_25fps.mp4">
+        <!-- CSS animated fallback (always visible) -->
+        <div class="vbg-fallback"></div>
+
+        <!-- Clip 1: sizzling steak / grilling dark -->
+        <video id="vbg-0" autoplay muted loop playsinline preload="auto"
+            onerror="this.style.display='none'"
+            src="https://cdn.pixabay.com/video/2022/10/18/134913-763050236_large.mp4">
         </video>
-        <!-- Clip 2: steam rising from dark bowl -->
+        <!-- Clip 2: steamy dark bowl / ramen -->
         <video id="vbg-1" muted loop playsinline preload="none"
-            src="https://videos.pexels.com/video-files/4253925/4253925-sd_960_506_25fps.mp4">
+            onerror="this.style.display='none'"
+            src="https://cdn.pixabay.com/video/2020/08/14/47247-449919886_large.mp4">
         </video>
-        <!-- Clip 3: dark kitchen meal prep -->
+        <!-- Clip 3: dark kitchen plating -->
         <video id="vbg-2" muted loop playsinline preload="none"
-            src="https://videos.pexels.com/video-files/6210787/6210787-sd_960_540_30fps.mp4">
+            onerror="this.style.display='none'"
+            src="https://cdn.pixabay.com/video/2022/04/07/113363-697799138_large.mp4">
         </video>
-        <!-- Clip 4: grilled protein sear -->
+        <!-- Clip 4: protein meal prep overhead -->
         <video id="vbg-3" muted loop playsinline preload="none"
-            src="https://videos.pexels.com/video-files/3048071/3048071-sd_640_360_24fps.mp4">
+            onerror="this.style.display='none'"
+            src="https://cdn.pixabay.com/video/2020/04/24/36908-413445779_large.mp4">
         </video>
 
         <div class="vbg-overlay"></div>
