@@ -355,6 +355,63 @@
                     </button>
                 </form>
             </div>
+
+            <!-- Membership Summary Box -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900 relative overflow-hidden">
+                <h3 class="text-lg font-light tracking-wider text-white mb-4 uppercase font-display">Membership Profile</h3>
+                
+                <div class="space-y-4 text-xs font-sans">
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-950">
+                        <span class="text-neutral-500 uppercase tracking-widest font-bold text-[9px]">Tier Plan:</span>
+                        <span class="font-bold text-white uppercase tracking-wide">
+                            {% if user.plan_tier == 'Hot' %}
+                                Daily Fresh-Hot
+                            {% else %}
+                                Frozen Vault
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-950">
+                        <span class="text-neutral-500 uppercase tracking-widest font-bold text-[9px]">Portions:</span>
+                        <span class="font-bold text-amber-500 uppercase tracking-wide">
+                            {% if user.protein_upgrade == 1 %}
+                                Gym Upgrade (8oz)
+                            {% else %}
+                                Standard (6oz)
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-2.5 border-b border-neutral-950">
+                        <span class="text-neutral-500 uppercase tracking-widest font-bold text-[9px]">Member Since:</span>
+                        <span class="text-neutral-300 font-medium">{{ formatted_start_date }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-2.5">
+                        <span class="text-neutral-500 uppercase tracking-widest font-bold text-[9px]">Intake Pickups:</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 font-bold font-display text-xs border border-amber-500/25 uppercase tracking-wider">
+                            {{ pickup_count }} Completed
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member Feedback / Review Form -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+                <h3 class="text-lg font-light tracking-wider text-white mb-4 uppercase font-display">Submit Feedback</h3>
+                <p class="text-[10px] text-neutral-500 uppercase tracking-widest mb-4">Share your feedback directly with the culinary team.</p>
+                
+                <form action="{{ url_for('submit_review') }}" method="POST" class="space-y-4">
+                    <div>
+                        <textarea name="review_text" required rows="3" placeholder="Tell us how you like the meals, portions, or seasoning..."
+                                  class="w-full p-3.5 rounded-xl bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-white text-xs placeholder-neutral-700 transition-colors resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-widest rounded-xl btn-glow transition-all font-display">
+                        Send Feedback
+                    </button>
+                </form>
+            </div>
         </div>
 
     </div>

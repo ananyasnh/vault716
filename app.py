@@ -49,9 +49,16 @@ def init_db():
                 phone_number TEXT NOT NULL,
                 plan_tier TEXT NOT NULL, -- 'Hot' or 'Frozen'
                 protein_upgrade INTEGER NOT NULL DEFAULT 0, -- 0 = Standard, 1 = Gym Upgrade
-                current_status TEXT NOT NULL DEFAULT 'Active' -- 'Active' or 'Paused'
+                current_status TEXT NOT NULL DEFAULT 'Active', -- 'Active' or 'Paused'
+                date_created TEXT DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        # Migrate users if date_created column is missing
+        try:
+            db.execute("ALTER TABLE users ADD COLUMN date_created TEXT DEFAULT CURRENT_TIMESTAMP")
+        except sqlite3.OperationalError:
+            pass
+
         # Create Orders table
         db.execute('''
             CREATE TABLE IF NOT EXISTS orders (
@@ -60,6 +67,17 @@ def init_db():
                 order_number INTEGER UNIQUE NOT NULL,
                 amount_due REAL NOT NULL,
                 payment_status TEXT NOT NULL DEFAULT 'Unpaid', -- 'Unpaid' or 'Paid'
+                date_created TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+
+        # Create Reviews table
+        db.execute('''
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                review_text TEXT NOT NULL,
                 date_created TEXT DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
@@ -396,6 +414,21 @@ def dashboard():
         session.clear()
         return redirect(url_for('login'))
         
+    # Count pickups (Paid orders)
+    pickups_row = query_db("SELECT COUNT(*) as count FROM orders WHERE user_id = ? AND payment_status = 'Paid'", (user['id'],), one=True)
+    pickup_count = pickups_row['count'] if pickups_row else 0
+
+    # Format membership start date
+    start_date = user.get('date_created') if 'date_created' in user.keys() else None
+    if start_date:
+        try:
+            dt = datetime.datetime.strptime(start_date.split('.')[0], '%Y-%m-%d %H:%M:%S')
+            formatted_start_date = dt.strftime('%B %d, %Y')
+        except Exception:
+            formatted_start_date = start_date
+    else:
+        formatted_start_date = "June 30, 2026"
+
     # Check if there is an active/unpaid order in the current week to show
     recent_order = query_db("""
         SELECT * FROM orders 
@@ -423,7 +456,9 @@ def dashboard():
         week_number=week_number,
         weekly_cost=weekly_cost,
         hot_spots_full=hot_spots_full,
-        spots_remaining=spots_remaining
+        spots_remaining=spots_remaining,
+        pickup_count=pickup_count,
+        formatted_start_date=formatted_start_date
     )
 
 @app.route('/update-plan', methods=['POST'])
@@ -462,6 +497,30 @@ def update_plan():
     except Exception as e:
         db.rollback()
         flash("Failed to update plan. Please try again.", "error")
+        
+    return redirect(url_for('dashboard'))
+
+@app.route('/submit-review', methods=['POST'])
+def submit_review():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    review_text = request.form.get('review_text', '').strip()
+    if not review_text:
+        flash("Review text cannot be empty.", "error")
+        return redirect(url_for('dashboard'))
+        
+    db = get_db()
+    try:
+        db.execute('''
+            INSERT INTO reviews (user_id, review_text)
+            VALUES (?, ?)
+        ''', (session['user_id'], review_text))
+        db.commit()
+        flash("Thank you! Your feedback has been logged.", "success")
+    except Exception as e:
+        db.rollback()
+        flash("Failed to submit feedback.", "error")
         
     return redirect(url_for('dashboard'))
 
@@ -608,13 +667,22 @@ def admin_portal():
         'chicken_lbs': round(total_chicken_lbs, 2)
     }
     
+    # Retrieve all submitted reviews
+    reviews_list = query_db("""
+        SELECT r.id, r.review_text, r.date_created, u.name, u.email
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        ORDER BY r.id DESC
+    """)
+    
     return render_template(
         'admin.html',
         active_hot_count=active_hot_count,
         hot_cap=HOT_MEAL_CAP,
         users=users_list,
         orders=orders_list,
-        kitchen_prep=kitchen_prep
+        kitchen_prep=kitchen_prep,
+        reviews=reviews_list
     )
 
 # AJAX API: Mark Paid
