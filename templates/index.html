@@ -3,14 +3,90 @@
 {% block title %}Vault 716 | Luxury Culinary Fuel{% endblock %}
 
 {% block content %}
-<div class="relative isolate overflow-hidden">
+{% block extra_head %}
+<style>
+/* ── Video crossfade background ──────────────────────────────────── */
+.vbg-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+.vbg-wrap video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 1.6s ease-in-out;
+    transform: scale(1.08);
+    animation: vbg-zoom 14s ease-in-out infinite alternate;
+    filter: brightness(0.45) saturate(1.2);
+}
+.vbg-wrap video.active {
+    opacity: 1;
+}
+@keyframes vbg-zoom {
+    from { transform: scale(1.08); }
+    to   { transform: scale(1.00); }
+}
+/* dark vignette overlay on top of videos */
+.vbg-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at center, transparent 20%, rgba(0,0,0,0.70) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.30) 50%, rgba(0,0,0,0.75) 100%);
+    z-index: 0;
+}
+/* amber tint pulse */
+.vbg-amber {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 60%, rgba(245,158,11,0.08) 0%, transparent 70%);
+    z-index: 0;
+    animation: amber-pulse 6s ease-in-out infinite alternate;
+}
+@keyframes amber-pulse {
+    from { opacity: 0.6; }
+    to   { opacity: 1; }
+}
+</style>
+{% endblock %}
+
+<div class="relative isolate overflow-hidden min-h-[88vh] flex items-center">
+
+    <!-- ── Video Background ──────────────────────────────── -->
+    <div class="vbg-wrap" aria-hidden="true">
+        <!-- Clip 1: sizzling steak close-up -->
+        <video id="vbg-0" autoplay muted loop playsinline preload="none"
+            src="https://videos.pexels.com/video-files/5945871/5945871-sd_960_506_25fps.mp4">
+        </video>
+        <!-- Clip 2: steam rising from dark bowl -->
+        <video id="vbg-1" muted loop playsinline preload="none"
+            src="https://videos.pexels.com/video-files/4253925/4253925-sd_960_506_25fps.mp4">
+        </video>
+        <!-- Clip 3: dark kitchen meal prep -->
+        <video id="vbg-2" muted loop playsinline preload="none"
+            src="https://videos.pexels.com/video-files/6210787/6210787-sd_960_540_30fps.mp4">
+        </video>
+        <!-- Clip 4: grilled protein sear -->
+        <video id="vbg-3" muted loop playsinline preload="none"
+            src="https://videos.pexels.com/video-files/3048071/3048071-sd_640_360_24fps.mp4">
+        </video>
+
+        <div class="vbg-overlay"></div>
+        <div class="vbg-amber"></div>
+    </div>
+
     <!-- Luxury Gold background glow decoration -->
     <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
         <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-amber-600 to-amber-900 opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
     </div>
 
     <!-- Hero Section -->
-    <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
+    <div class="relative z-10 mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 w-full">
         <div class="mx-auto max-w-3xl text-center">
             <!-- Glowing pulse badge -->
             <div class="mb-6 flex justify-center">
@@ -29,7 +105,7 @@
             </div>
 
             <!-- Title: VAULT 716 -->
-            <h1 class="text-5xl font-light tracking-[0.25em] text-white sm:text-7xl font-display uppercase">
+            <h1 class="text-5xl font-light tracking-[0.25em] text-white sm:text-7xl font-display uppercase drop-shadow-2xl">
                 VAULT <span class="text-amber-500 font-normal">716</span>
             </h1>
             
@@ -38,14 +114,14 @@
                 Elite Culinary Fuel. Massive Macros. Capped at 25 Members.
             </p>
             
-            <p class="mt-6 text-sm leading-relaxed text-neutral-400 max-w-xl mx-auto font-sans">
+            <p class="mt-6 text-sm leading-relaxed text-neutral-300 max-w-xl mx-auto font-sans drop-shadow-md">
                 A private, high-performance meal-prep service pre-crafting chef-driven culinary containers. Strictly cash on pickup. Sealed for extreme preservation.
             </p>
 
             <!-- Capping Info Alert -->
             {% if hot_spots_full %}
             <div class="mt-8 max-w-lg mx-auto">
-                <div class="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs shadow-xl text-left flex items-start space-x-3">
+                <div class="p-4 rounded-2xl bg-neutral-900/80 backdrop-blur-sm border border-neutral-800 text-neutral-300 text-xs shadow-xl text-left flex items-start space-x-3">
                     <svg class="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
@@ -68,6 +144,44 @@
         </div>
     </div>
 </div>
+
+<!-- ── Crossfade Video Controller ───────────────────────── -->
+<script>
+(function () {
+    const total = 4;
+    let current = 0;
+
+    // Preload and play first clip immediately
+    const first = document.getElementById('vbg-0');
+    first.classList.add('active');
+    first.load();
+    first.play().catch(() => {});
+
+    // Preload next clip silently
+    function preloadNext(idx) {
+        const el = document.getElementById('vbg-' + idx);
+        if (el) { el.load(); el.play().catch(() => {}); }
+    }
+
+    setInterval(function () {
+        const prevEl = document.getElementById('vbg-' + current);
+        current = (current + 1) % total;
+        const nextEl = document.getElementById('vbg-' + current);
+
+        // Ensure next video is playing before fading in
+        nextEl.play().catch(() => {});
+        nextEl.classList.add('active');
+
+        // Fade out prev after a short overlap
+        setTimeout(function () {
+            prevEl.classList.remove('active');
+        }, 800);
+
+        // Preload the one after next
+        preloadNext((current + 1) % total);
+    }, 7000);
+}());
+</script>
 
 <!-- Styling for premium tier animations -->
 <style>
