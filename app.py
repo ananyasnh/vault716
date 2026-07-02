@@ -9,6 +9,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'vault716_secure_session_token_198
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'vault716.db')
 
 HOT_MEAL_CAP = 25
+FROZEN_MEAL_CAP = 15
 WHATSAPP_LINK = 'https://chat.whatsapp.com/placeholder'
 
 # -------------------------------------------------------------
@@ -82,6 +83,18 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         ''')
+        # Create Waitlist table
+        db.execute('''
+            CREATE TABLE IF NOT EXISTS waitlist (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                phone_number TEXT NOT NULL,
+                plan_tier TEXT NOT NULL,
+                protein_upgrade INTEGER NOT NULL DEFAULT 0,
+                date_created TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         db.commit()
 
         # Seed data if database is empty
@@ -137,6 +150,16 @@ def get_active_hot_subscribers():
     cursor.execute("""
         SELECT COUNT(*) FROM users 
         WHERE plan_tier = 'Hot' AND current_status = 'Active'
+    """)
+    return cursor.fetchone()[0]
+
+def get_active_frozen_subscribers():
+    """Counts the total number of users where plan_tier = 'Frozen' and current_status = 'Active'."""
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT COUNT(*) FROM users 
+        WHERE plan_tier = 'Frozen' AND current_status = 'Active'
     """)
     return cursor.fetchone()[0]
 
@@ -304,8 +327,10 @@ def tier_detail(tier_type):
     if tier_type not in ['fresh-hot', 'weekly-frozen']:
         return redirect(url_for('home'))
     active_hot = get_active_hot_subscribers()
+    active_frozen = get_active_frozen_subscribers()
     spots_remaining = max(0, HOT_MEAL_CAP - active_hot)
     hot_spots_full = (active_hot >= HOT_MEAL_CAP)
+    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
     week_13, week_24 = get_detailed_menus()
     return render_template(
         'tier_details.html',
@@ -313,7 +338,8 @@ def tier_detail(tier_type):
         week_13=week_13,
         week_24=week_24,
         spots_remaining=spots_remaining,
-        hot_spots_full=hot_spots_full
+        hot_spots_full=hot_spots_full,
+        frozen_spots_full=frozen_spots_full
     )
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -322,7 +348,9 @@ def register():
         return redirect(url_for('dashboard'))
         
     active_hot = get_active_hot_subscribers()
+    active_frozen = get_active_frozen_subscribers()
     hot_spots_full = (active_hot >= HOT_MEAL_CAP)
+    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
 
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
@@ -335,11 +363,33 @@ def register():
         # Validation
         if not name or not email or not password or not phone:
             flash("All fields are required.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full)
+            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
             
-        if plan_tier == 'Hot' and hot_spots_full:
-            flash("Daily Fresh-Hot spots are currently full! Please choose the Frozen Vault instead.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full)
+        if (plan_tier == 'Hot' and hot_spots_full) or (plan_tier == 'Frozen' and frozen_spots_full):
+            # Route to waitlist instead if cap reached
+            db = get_db()
+            try:
+                db.execute('''
+                    INSERT INTO waitlist (name, email, phone_number, plan_tier, protein_upgrade)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (name, email, phone, plan_tier, protein_upgrade))
+                db.commit()
+                weekly_cost = calculate_amount(plan_tier, protein_upgrade)
+                flash("Spot cap reached! You have been successfully added to our Priority Waitlist.", "success")
+                return render_template(
+                    'waitlist_success.html',
+                    name=name,
+                    email=email,
+                    phone=phone,
+                    plan_tier=plan_tier,
+                    protein_upgrade=protein_upgrade,
+                    weekly_cost=weekly_cost,
+                    whatsapp_link=WHATSAPP_LINK
+                )
+            except Exception:
+                db.rollback()
+                flash("An error occurred. Please try again.", "error")
+                return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
 
         db = get_db()
         cursor = db.cursor()
@@ -348,7 +398,7 @@ def register():
         cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
         if cursor.fetchone():
             flash("Email address is already registered.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full)
+            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
             
         try:
             password_hash = generate_password_hash(password)
@@ -368,9 +418,45 @@ def register():
         except Exception as e:
             db.rollback()
             flash("An error occurred. Please try again.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full)
+            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
             
-    return render_template('register.html', hot_spots_full=hot_spots_full)
+    return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+
+@app.route('/api/waitlist', methods=['POST'])
+def api_waitlist():
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    phone = request.form.get('phone', '').strip()
+    plan_tier = request.form.get('plan_tier', 'Frozen')
+    protein_upgrade = 1 if request.form.get('protein_upgrade') else 0
+    
+    if not name or not email or not phone:
+        flash("All fields are required to join the waitlist.", "error")
+        return redirect(url_for('register'))
+        
+    db = get_db()
+    try:
+        db.execute('''
+            INSERT INTO waitlist (name, email, phone_number, plan_tier, protein_upgrade)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (name, email, phone, plan_tier, protein_upgrade))
+        db.commit()
+        weekly_cost = calculate_amount(plan_tier, protein_upgrade)
+        flash("You have been successfully added to our Priority Waitlist!", "success")
+        return render_template(
+            'waitlist_success.html',
+            name=name,
+            email=email,
+            phone=phone,
+            plan_tier=plan_tier,
+            protein_upgrade=protein_upgrade,
+            weekly_cost=weekly_cost,
+            whatsapp_link=WHATSAPP_LINK
+        )
+    except Exception as e:
+        db.rollback()
+        flash("An error occurred. Please try again.", "error")
+        return redirect(url_for('register'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -675,6 +761,13 @@ def admin_portal():
         ORDER BY r.id DESC
     """)
     
+    # Retrieve priority waitlist queue
+    waitlist_queue = query_db("""
+        SELECT id, name, email, phone_number, plan_tier, protein_upgrade, date_created 
+        FROM waitlist
+        ORDER BY id ASC
+    """)
+    
     return render_template(
         'admin.html',
         active_hot_count=active_hot_count,
@@ -682,7 +775,8 @@ def admin_portal():
         users=users_list,
         orders=orders_list,
         kitchen_prep=kitchen_prep,
-        reviews=reviews_list
+        reviews=reviews_list,
+        waitlist=waitlist_queue
     )
 
 # AJAX API: Mark Paid

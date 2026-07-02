@@ -308,6 +308,58 @@
         {% endif %}
     </div>
 
+    <!-- Priority Waitlist Queue -->
+    <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+        <h2 class="text-lg font-light tracking-wider text-white mb-6 uppercase font-display flex items-center">
+            <span class="h-2 w-2 rounded-full bg-red-500 mr-2 flex-shrink-0 animate-pulse"></span>
+            Priority Waitlist Queue
+        </h2>
+        
+        {% if waitlist %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead>
+                    <tr class="border-b border-neutral-900 text-neutral-500 uppercase text-[9px] tracking-widest font-bold">
+                        <th class="py-3">Name</th>
+                        <th class="py-3">Contact</th>
+                        <th class="py-3">Tier Requested</th>
+                        <th class="py-3">Upgrade Modifier</th>
+                        <th class="py-3">Enrolled At</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-950">
+                    {% for item in waitlist %}
+                    <tr class="text-neutral-300">
+                        <td class="py-4">
+                            <span class="block font-semibold text-white">{{ item.name }}</span>
+                            <span class="block text-[10px] text-neutral-500 font-mono mt-0.5">{{ item.email }}</span>
+                        </td>
+                        <td class="py-4 font-mono text-neutral-400">{{ item.phone_number }}</td>
+                        <td class="py-4">
+                            {% if item.plan_tier == 'Hot' %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/25">HOT</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-neutral-900 text-neutral-450 border border-neutral-800">FROZEN</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4">
+                            {% if item.protein_upgrade == 1 %}
+                                <span class="text-amber-500 font-semibold uppercase tracking-wider text-[10px]">Gym (8oz)</span>
+                            {% else %}
+                                <span class="text-neutral-500 text-[10px]">Standard (6oz)</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 font-mono text-neutral-500">{{ item.date_created }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-xs text-neutral-500 text-center py-6 uppercase tracking-wider">No priority waitlist records logged.</p>
+        {% endif %}
+    </div>
+
 </div>
 
 <!-- Admin Portal AJAX Javascript Handler -->

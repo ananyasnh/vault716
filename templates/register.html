@@ -104,6 +104,11 @@
                 </div>
             </div>
 
+            <!-- Mindset Warning Notice -->
+            <div class="p-4 rounded-2xl bg-amber-950/20 border border-amber-900/30 text-amber-300 text-[10px] text-center leading-relaxed font-sans">
+                ⚠️ NOTE: Our roster starts immediately this coming Monday. If you are not super serious or completely ready to commit to your nutrition goals right now, please do not apply yet. You can always apply later when you have the right mindset.
+            </div>
+
             <!-- Submit -->
             <div class="pt-2">
                 <button type="submit"
@@ -147,6 +152,33 @@
     </div>
 </div>
 
+<!-- Post-Signup Welcome & Billing Modal -->
+<div id="welcome-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-neutral-900 border border-amber-500/30 rounded-2xl p-6 sm:p-8 max-w-md mx-auto relative space-y-6 shadow-2xl animate-fade-in">
+        <h3 class="text-base font-bold text-amber-500 tracking-wider font-display text-center uppercase flex items-center justify-center gap-2">
+            🎉 APPLICATION STAGED: HOW IT WORKS
+        </h3>
+        
+        <div class="space-y-4 text-xs text-neutral-300 leading-relaxed font-sans">
+            <p>
+                <strong>• IMMEDIATE START:</strong> Your meal service officially begins this coming Monday.
+            </p>
+            <p>
+                <strong>• WEEKLY BILLING CYCLE:</strong> Payment for your first week is due on Monday when you collect your meals. To secure your following weeks, payment for the next week must be sent every consecutive Friday.
+            </p>
+            <p>
+                <strong>• UPFRONT MONTHLY OPTION:</strong> Prefer hands-off convenience? You can pay for your entire month upfront ($200 for Standard, or the corresponding sum adjusted for your Gym Upgrade tier) on your very first Monday pickup.
+            </p>
+        </div>
+
+        <div class="pt-2">
+            <button type="button" id="btn-welcome-agree" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors font-display shadow-lg btn-glow font-sans">
+                I Agree to the Terms — Get my WhatsApp Access Link
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     // YOUR WHATSAPP NUMBER PLACEHOLDER
     const myWhatsAppNumber = "14033344500";
@@ -171,10 +203,12 @@
         // Modal elements
         const form = document.querySelector('form');
         const safetyModal = document.getElementById('safety-modal');
+        const welcomeModal = document.getElementById('welcome-modal');
         const btnCancel = document.getElementById('btn-modal-cancel');
         const btnConfirm = document.getElementById('btn-modal-confirm');
+        const btnAgree = document.getElementById('btn-welcome-agree');
 
-        if (form && safetyModal && btnCancel && btnConfirm) {
+        if (form && safetyModal && welcomeModal && btnCancel && btnConfirm && btnAgree) {
             form.addEventListener('submit', function(event) {
                 // Intercept submit
                 event.preventDefault();
@@ -188,8 +222,14 @@
             });
 
             btnConfirm.addEventListener('click', function() {
-                // Close modal
+                // Close safety modal and open welcome modal
                 safetyModal.classList.add('hidden');
+                welcomeModal.classList.remove('hidden');
+            });
+
+            btnAgree.addEventListener('click', function() {
+                // Close welcome modal
+                welcomeModal.classList.add('hidden');
 
                 // Read input values
                 const nameVal = document.getElementById('name').value;
@@ -202,13 +242,21 @@
                 const macroAllocation = isGymUpgrade ? "High-Protein Gym Upgrade" : "Standard";
 
                 // Construct text message
-                const message = `Vault 716 Application 🚀\nName: ${nameVal}\nPhone: ${phoneVal}\nTier Requested: ${tierRequested}\nMacro Allocation: ${macroAllocation}`;
+                const message = `Vault 716 Application Confirmation 🚀\n\nName: ${nameVal}\nPhone: ${phoneVal}\nTier: ${tierRequested}\nPlan: ${macroAllocation}\n\nCONFIRMATIONS:\n1. I confirm I am ready to start immediately this coming Monday.\n2. I understand this is an elite culinary performance service, not a casual trial.\n3. I am super serious about locking in this spot.\n4. I agree to the Friday/Monthly prepayment cycles outlined on the site.\n\nAm I ready to lock it in and receive the private VIP group chat link? YES.`;
                 
                 // Construct URL
                 const whatsappUrl = `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(message)}`;
                 
                 // Redirect/open tab
                 window.open(whatsappUrl, '_blank');
+                
+                // Check if selected tier is full on the server side
+                const isHotFull = {% if hot_spots_full %}true{% else %}false{% endif %};
+                const isFrozenFull = {% if frozen_spots_full %}true{% else %}false{% endif %};
+                
+                if ((tierRequested === "Fresh-Hot" && isHotFull) || (tierRequested === "Weekly-Frozen" && isFrozenFull)) {
+                    form.action = "/api/waitlist";
+                }
                 
                 // Submit form to backend
                 form.submit();

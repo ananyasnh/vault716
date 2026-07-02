@@ -282,17 +282,36 @@
     <!-- ================================================================ -->
     <!-- CALL TO ACTION                                                   -->
     <!-- ================================================================ -->
-    <div class="pt-4 text-center space-y-3">
-        {% if tier_type == 'fresh-hot' and hot_spots_full %}
-            <button disabled class="w-full sm:w-auto px-12 py-4 bg-neutral-900 border border-neutral-800 text-neutral-600 font-bold uppercase tracking-widest rounded-xl text-xs cursor-not-allowed font-display">
-                Hot Placements Sold Out
-            </button>
-            <p class="text-[10px] text-amber-400 uppercase tracking-wider">Join waitlist via the Frozen Vault</p>
+    <div class="pt-4 text-center">
+        <!-- Mindset Warning Notice -->
+        <div class="max-w-xl mx-auto p-4 rounded-2xl bg-amber-950/20 border border-amber-900/30 text-amber-300 text-[10px] text-center leading-relaxed font-sans mb-6">
+            ⚠️ NOTE: Our roster starts immediately this coming Monday. If you are not super serious or completely ready to commit to your nutrition goals right now, please do not apply yet. You can always apply later when you have the right mindset.
+        </div>
+
+        {% if tier_type == 'fresh-hot' %}
+            {% if hot_spots_full %}
+                <a href="{{ url_for('register', plan_tier='Hot') }}"
+                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 bg-red-950/20 hover:bg-red-950/40 transition-all duration-300 font-display shadow-lg">
+                    Roster Full — Join Fresh-Hot Waitlist
+                </a>
+            {% else %}
+                <a href="{{ url_for('register', plan_tier='Hot') }}"
+                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
+                    Lock In Fresh-Hot Tier
+                </a>
+            {% endif %}
         {% else %}
-            <a href="{{ url_for('register', plan_tier='Hot' if tier_type == 'fresh-hot' else 'Frozen') }}"
-               class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
-                {% if tier_type == 'fresh-hot' %}Lock In Fresh-Hot Tier{% else %}Lock In Frozen Tier{% endif %}
-            </a>
+            {% if frozen_spots_full %}
+                <a href="{{ url_for('register', plan_tier='Frozen') }}"
+                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 bg-red-950/20 hover:bg-red-950/40 transition-all duration-300 font-display shadow-lg">
+                    Roster Full — Join Frozen Waitlist
+                </a>
+            {% else %}
+                <a href="{{ url_for('register', plan_tier='Frozen') }}"
+                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
+                    Lock In Frozen Tier
+                </a>
+            {% endif %}
         {% endif %}
     </div>
 
