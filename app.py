@@ -348,7 +348,7 @@ def tier_detail(tier_type):
         frozen_spots_full=frozen_spots_full
     )
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET'])
 def register():
     if 'user_id' in session:
         return redirect(url_for('dashboard'))
@@ -357,74 +357,84 @@ def register():
     active_frozen = get_active_frozen_subscribers()
     hot_spots_full = (active_hot >= HOT_MEAL_CAP)
     frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
+    return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
 
-    if request.method == 'POST':
-        name = request.form.get('name', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        password = request.form.get('password', '')
-        phone = request.form.get('phone', '').strip()
-        plan_tier = request.form.get('plan_tier', 'Frozen')
-        protein_upgrade = 1 if request.form.get('protein_upgrade') else 0
+@app.route('/apply', methods=['POST'])
+def apply():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
         
-        # Validation
-        if not name or not email or not password or not phone:
-            flash("All fields are required.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-            
-        if (plan_tier == 'Hot' and hot_spots_full) or (plan_tier == 'Frozen' and frozen_spots_full):
-            # Route to waitlist instead if cap reached
-            db = get_db()
-            try:
-                db.execute('''
-                    INSERT INTO waitlist (name, email, phone_number, plan_tier, protein_upgrade)
-                    VALUES (?, ?, ?, ?, ?)
-                ''', (name, email, phone, plan_tier, protein_upgrade))
-                db.commit()
-                weekly_cost = calculate_amount(plan_tier, protein_upgrade)
-                flash("Spot cap reached! You have been successfully added to our Priority Waitlist.", "success")
-                return render_template(
-                    'waitlist_success.html',
-                    name=name,
-                    email=email,
-                    phone=phone,
-                    plan_tier=plan_tier,
-                    protein_upgrade=protein_upgrade,
-                    weekly_cost=weekly_cost,
-                    whatsapp_link=WHATSAPP_LINK
-                )
-            except Exception:
-                db.rollback()
-                flash("An error occurred. Please try again.", "error")
-                return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+    active_hot = get_active_hot_subscribers()
+    active_frozen = get_active_frozen_subscribers()
+    hot_spots_full = (active_hot >= HOT_MEAL_CAP)
+    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
 
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    password = request.form.get('password', '')
+    phone = request.form.get('phone', '').strip()
+    plan_tier = request.form.get('plan_tier', 'Frozen')
+    protein_upgrade = 1 if request.form.get('protein_upgrade') else 0
+    
+    # Validation
+    if not name or not email or not password or not phone:
+        flash("All fields are required.", "error")
+        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+        
+    if (plan_tier == 'Hot' and hot_spots_full) or (plan_tier == 'Frozen' and frozen_spots_full):
+        # Route to waitlist instead if cap reached
         db = get_db()
-        cursor = db.cursor()
-        
-        # Check duplicate email
-        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
-        if cursor.fetchone():
-            flash("Email address is already registered.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-            
         try:
-            password_hash = generate_password_hash(password)
-            cursor.execute('''
-                INSERT INTO users (name, email, password_hash, phone_number, plan_tier, protein_upgrade, current_status)
-                VALUES (?, ?, ?, ?, ?, ?, 'Active')
-            ''', (name, email, password_hash, phone, plan_tier, protein_upgrade))
+            db.execute('''
+                INSERT INTO waitlist (name, email, phone_number, plan_tier, protein_upgrade)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (name, email, phone, plan_tier, protein_upgrade))
             db.commit()
-            
-            # Log user in
-            user_id = cursor.lastrowid
-            session['user_id'] = user_id
-            session['user_name'] = name
-            
-            flash("Account created successfully!", "success")
-            return redirect(url_for('dashboard'))
-        except Exception as e:
+            weekly_cost = calculate_amount(plan_tier, protein_upgrade)
+            flash("Spot cap reached! You have been successfully added to our Priority Waitlist.", "success")
+            return render_template(
+                'waitlist_success.html',
+                name=name,
+                email=email,
+                phone=phone,
+                plan_tier=plan_tier,
+                protein_upgrade=protein_upgrade,
+                weekly_cost=weekly_cost,
+                whatsapp_link=WHATSAPP_LINK
+            )
+        except Exception:
             db.rollback()
             flash("An error occurred. Please try again.", "error")
             return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+
+    db = get_db()
+    cursor = db.cursor()
+    
+    # Check duplicate email
+    cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+    if cursor.fetchone():
+        flash("Email address is already registered.", "error")
+        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+        
+    try:
+        password_hash = generate_password_hash(password)
+        cursor.execute('''
+            INSERT INTO users (name, email, password_hash, phone_number, plan_tier, protein_upgrade, current_status)
+            VALUES (?, ?, ?, ?, ?, ?, 'Active')
+        ''', (name, email, password_hash, phone, plan_tier, protein_upgrade))
+        db.commit()
+        
+        # Log user in
+        user_id = cursor.lastrowid
+        session['user_id'] = user_id
+        session['user_name'] = name
+        
+        flash("Account created successfully!", "success")
+        return redirect(url_for('dashboard'))
+    except Exception as e:
+        db.rollback()
+        flash("An error occurred. Please try again.", "error")
+        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
             
     return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
 
