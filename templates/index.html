@@ -75,42 +75,42 @@
     /* Rising steam/fire particles for Daily Fresh-Hot card */
     @keyframes steam {
         0% {
-            transform: translateY(0) scale(0.8) rotate(0deg);
+            transform: translateY(0) scale(0.7) rotate(0deg);
             opacity: 0;
         }
         30% {
-            opacity: 0.6;
+            opacity: 0.85;
         }
         100% {
-            transform: translateY(-90px) scale(1.4) rotate(15deg);
+            transform: translateY(-380px) scale(1.3) rotate(25deg);
             opacity: 0;
         }
     }
     .steam-particle {
         position: absolute;
         pointer-events: none;
-        animation: steam 3s infinite ease-in-out;
+        animation: steam 3.5s infinite ease-in-out;
         opacity: 0;
     }
     
     /* Falling snow/hail particles for Frozen Vault card */
     @keyframes snow {
         0% {
-            transform: translateY(-20px) rotate(0deg) scale(0.8);
+            transform: translateY(-30px) rotate(0deg) scale(0.7);
             opacity: 0;
         }
-        20% {
-            opacity: 0.7;
+        25% {
+            opacity: 0.85;
         }
         100% {
-            transform: translateY(130px) rotate(360deg) scale(1.2);
+            transform: translateY(420px) rotate(360deg) scale(1.1);
             opacity: 0;
         }
     }
     .snow-particle {
         position: absolute;
         pointer-events: none;
-        animation: snow 4s infinite linear;
+        animation: snow 4.5s infinite linear;
         opacity: 0;
     }
 </style>
@@ -127,7 +127,7 @@
             <!-- Tier 1: Daily Fresh-Hot Pickup -->
             <a href="/tier/fresh-hot" class="flex flex-col justify-between rounded-3xl p-8 glass-panel shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-amber-500/30 hover:shadow-lg hover:shadow-amber-500/5 cursor-pointer group no-underline {% if hot_spots_full %}opacity-60 grayscale-[20%]{% endif %}">
                 <!-- Floating hot particles -->
-                <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
                     <span class="steam-particle text-amber-500/25" style="left: 15%; bottom: -10px; animation-delay: 0s; font-size: 24px;">🔥</span>
                     <span class="steam-particle text-amber-500/15" style="left: 45%; bottom: -15px; animation-delay: 1.2s; font-size: 28px;">♨️</span>
                     <span class="steam-particle text-amber-500/30" style="left: 75%; bottom: -10px; animation-delay: 0.6s; font-size: 20px;">🔥</span>
@@ -177,7 +177,7 @@
             <!-- Tier 2: Frozen Vault -->
             <a href="/tier/weekly-frozen" class="flex flex-col justify-between rounded-3xl p-8 glass-panel shadow-2xl relative overflow-hidden transition-all duration-300 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 cursor-pointer group no-underline">
                 <!-- Floating cold particles -->
-                <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
                     <span class="snow-particle text-blue-400/30" style="left: 20%; top: -10px; animation-delay: 0s; font-size: 24px;">❄️</span>
                     <span class="snow-particle text-blue-300/20" style="left: 50%; top: -15px; animation-delay: 1.5s; font-size: 28px;">🌨️</span>
                     <span class="snow-particle text-blue-400/35" style="left: 80%; top: -10px; animation-delay: 0.8s; font-size: 20px;">❄️</span>
