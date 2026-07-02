@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Vault 716{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 space-y-10">
+    
+    <!-- Dashboard Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-neutral-900 gap-4">
+        <div>
+            <h1 class="text-3xl font-light tracking-wider text-white uppercase font-display">Member Workspace</h1>
+            <p class="text-xs text-neutral-500 uppercase tracking-widest mt-1">Personal subscription control & weekly menu</p>
+        </div>
+        
+        <!-- Status indicator badge -->
+        <div class="flex items-center space-x-3">
+            <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest">Subscription:</span>
+            {% if user.current_status == 'Active' %}
+                <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/25">
+                    <span class="h-2 w-2 rounded-full bg-amber-500 mr-2 flex-shrink-0 animate-pulse"></span>
+                    Active
+                </span>
+            {% else %}
+                <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-neutral-900 text-neutral-400 border border-neutral-800">
+                    Paused
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Column 1 & 2: Menu and Orders -->
+        <div class="lg:col-span-2 space-y-8">
+            
+            <!-- Gourmet Menu Section -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl relative overflow-hidden border border-neutral-900">
+                <div class="absolute top-0 right-0 h-40 w-40 bg-amber-500/5 blur-2xl rounded-full"></div>
+                
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 border-b border-neutral-900 pb-4">
+                    <div>
+                        <h2 class="text-xl font-light tracking-wider text-white uppercase font-display">Gourmet Selection</h2>
+                        <p class="text-[10px] text-amber-500/80 uppercase tracking-widest mt-0.5">{{ menu.week_type }} (Week {{ week_number }}) — Serving {{ menu.name }}</p>
+                    </div>
+                    
+                    <!-- Tabs for Current Week vs 4-Week Menu -->
+                    <div class="flex items-center space-x-2 self-start sm:self-center">
+                        <button onclick="showMenuTab('current')" id="tab-btn-current" class="px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all bg-amber-500/10 text-amber-400 border-amber-500/35">
+                            Current Week
+                        </button>
+                        <button onclick="showMenuTab('four-week')" id="tab-btn-four-week" class="px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all border-neutral-800 text-neutral-555 hover:border-neutral-700">
+                            4-Week Rotation
+                        </button>
+                        
+                        <!-- Menu Simulation toggle bar -->
+                        <div id="sim-bar-dashboard" class="flex items-center space-x-1 border-l border-neutral-800 pl-2">
+                            <span class="text-[8px] text-neutral-500 uppercase tracking-widest font-bold">Sim:</span>
+                            <a href="{{ url_for('dashboard', simulate_week=1) }}" 
+                               class="px-2 py-0.5 rounded text-[8px] font-bold uppercase border transition-all 
+                                      {% if week_number % 2 != 0 %}bg-amber-500/10 text-amber-400 border-amber-500/35{% else %}border-neutral-800 text-neutral-500 hover:border-neutral-700{% endif %}">A</a>
+                            <a href="{{ url_for('dashboard', simulate_week=2) }}" 
+                               class="px-2 py-0.5 rounded text-[8px] font-bold uppercase border transition-all 
+                                      {% if week_number % 2 == 0 %}bg-amber-500/10 text-amber-400 border-amber-500/35{% else %}border-neutral-800 text-neutral-500 hover:border-neutral-700{% endif %}">B</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Protein Modification Header -->
+                <div class="mb-6 p-4 rounded-2xl bg-neutral-950 border border-neutral-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <span class="text-[9px] text-neutral-500 uppercase tracking-widest block font-bold">Macro Portion Tier</span>
+                        <span class="text-sm font-semibold text-white font-display uppercase tracking-wide">
+                            {% if user.protein_upgrade == 1 %}
+                                High-Protein Gym Portion (8oz Portion Included)
+                            {% else %}
+                                Standard Chef Portion (6oz Portion Included)
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div>
+                        {% if user.protein_upgrade == 1 %}
+                            <span class="px-3 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/25 text-[10px] font-bold tracking-widest uppercase">GYM UPGRADE ACTIVE</span>
+                        {% else %}
+                            <span class="px-3 py-1 rounded bg-neutral-900 text-neutral-500 border border-neutral-800 text-[10px] font-bold tracking-widest uppercase">STANDARD PORTIONS</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% set all_weeks = [
+                    {'num': 1, 'name': 'Week 1', 'menu_name': 'Menu A', 'items': [
+                        {'day': 'Monday', 'meal': 'Creamy Penne alla Vodka with Sliced Grilled Chicken', 'img': 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop'},
+                        {'day': 'Tuesday', 'meal': 'Chipotle-Style Shredded Chicken Taco Bowl (Rice & Beans)', 'img': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop'},
+                        {'day': 'Wednesday', 'meal': 'Rich Chicken Tikka Masala over Basmati Rice', 'img': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&auto=format&fit=crop'},
+                        {'day': 'Thursday', 'meal': 'Sweet Teriyaki Chicken Thighs over Jasmine Rice & Broccoli', 'img': 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&auto=format&fit=crop'},
+                        {'day': 'Friday', 'meal': 'BBQ Pulled Chicken over Roasted Sweet Potatoes & Mac & Cheese', 'img': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop'}
+                    ]},
+                    {'num': 2, 'name': 'Week 2', 'menu_name': 'Menu B', 'items': [
+                        {'day': 'Monday', 'meal': 'Creamy Fettuccine Alfredo with Juicy Garlic-Herb Grilled Chicken', 'img': 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&auto=format&fit=crop'},
+                        {'day': 'Tuesday', 'meal': 'Beef or Chicken Enchilada Bake with Melted Cheese & Black Beans', 'img': 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&auto=format&fit=crop'},
+                        {'day': 'Wednesday', 'meal': 'Savory Butter Chicken over Aromatic Basmati Rice', 'img': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop'},
+                        {'day': 'Thursday', 'meal': 'Spicy Garlic-Ginger Soy Chicken Stir-Fry with Rice & Snap Peas', 'img': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop'},
+                        {'day': 'Friday', 'meal': 'Homemade Chili Con Carne with a side of Cornbread', 'img': 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=600&auto=format&fit=crop'}
+                    ]},
+                    {'num': 3, 'name': 'Week 3', 'menu_name': 'Menu A', 'items': [
+                        {'day': 'Monday', 'meal': 'Creamy Penne alla Vodka with Sliced Grilled Chicken', 'img': 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop'},
+                        {'day': 'Tuesday', 'meal': 'Chipotle-Style Shredded Chicken Taco Bowl (Rice & Beans)', 'img': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop'},
+                        {'day': 'Wednesday', 'meal': 'Rich Chicken Tikka Masala over Basmati Rice', 'img': 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&auto=format&fit=crop'},
+                        {'day': 'Thursday', 'meal': 'Sweet Teriyaki Chicken Thighs over Jasmine Rice & Broccoli', 'img': 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&auto=format&fit=crop'},
+                        {'day': 'Friday', 'meal': 'BBQ Pulled Chicken over Roasted Sweet Potatoes & Mac & Cheese', 'img': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop'}
+                    ]},
+                    {'num': 4, 'name': 'Week 4', 'menu_name': 'Menu B', 'items': [
+                        {'day': 'Monday', 'meal': 'Creamy Fettuccine Alfredo with Juicy Garlic-Herb Grilled Chicken', 'img': 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&auto=format&fit=crop'},
+                        {'day': 'Tuesday', 'meal': 'Beef or Chicken Enchilada Bake with Melted Cheese & Black Beans', 'img': 'https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&auto=format&fit=crop'},
+                        {'day': 'Wednesday', 'meal': 'Savory Butter Chicken over Aromatic Basmati Rice', 'img': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop'},
+                        {'day': 'Thursday', 'meal': 'Spicy Garlic-Ginger Soy Chicken Stir-Fry with Rice & Snap Peas', 'img': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop'},
+                        {'day': 'Friday', 'meal': 'Homemade Chili Con Carne with a side of Cornbread', 'img': 'https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=600&auto=format&fit=crop'}
+                    ]}
+                ] %}
+
+                <!-- Container for toggled panels -->
+                <div id="current-week-menu-panel">
+                    <!-- Gourmet Masonry/Grid Menu Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {% for item in menu.items %}
+                        <!-- Image Mapping -->
+                        {% set img_url = "" %}
+                        {% if menu.name == "Menu A" %}
+                            {% if item.day == "Monday" %}{% set img_url = "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Tuesday" %}{% set img_url = "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Wednesday" %}{% set img_url = "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Thursday" %}{% set img_url = "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Friday" %}{% set img_url = "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop" %}
+                            {% endif %}
+                        {% else %}
+                            {% if item.day == "Monday" %}{% set img_url = "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Tuesday" %}{% set img_url = "https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Wednesday" %}{% set img_url = "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Thursday" %}{% set img_url = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop" %}
+                            {% elif item.day == "Friday" %}{% set img_url = "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=600&auto=format&fit=crop" %}
+                            {% endif %}
+                        {% endif %}
+                        
+                        <div class="rounded-2xl border border-neutral-900 bg-neutral-950/60 p-4 flex flex-col justify-between hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
+                            <div>
+                                <!-- Food image placeholder -->
+                                <div class="bg-neutral-900 border border-neutral-800 rounded-xl h-44 w-full overflow-hidden mb-4 relative group flex items-center justify-center">
+                                    <img src="{{ img_url }}" alt="{{ item.meal }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/65 to-transparent"></div>
+                                    <span class="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-neutral-950/90 py-1 px-2.5 rounded-lg border border-neutral-800">{{ item.day }}</span>
+                                </div>
+                                
+                                <h3 class="text-sm font-semibold text-white leading-snug">{{ item.meal }}</h3>
+                            </div>
+                            
+                            <!-- Nutrition Tags -->
+                            <div class="mt-4 pt-3 border-t border-neutral-900 flex flex-wrap gap-2">
+                                {% if user.protein_upgrade == 1 %}
+                                    <!-- Gym Upgrade Active: Hide Standard and Display Gym Upgrade Macros text in Amber-bordered badge -->
+                                    <span class="px-3 py-1.5 rounded-lg border border-amber-500 bg-amber-500/10 text-[9px] font-bold tracking-widest text-amber-400 uppercase">
+                                        Gym Upgrade Macros: 920 Cal / 75g Protein
+                                    </span>
+                                {% else %}
+                                    <!-- Standard Active: Show Standard macro card and hide Gym badge -->
+                                    <div class="px-3 py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-[9px] font-bold tracking-widest text-neutral-400 uppercase">
+                                        Standard Macros: 780 Cal / 55g Protein
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 4-Week Menu Rotation Panel -->
+                <div id="four-week-menu-panel" class="hidden space-y-6">
+                    <!-- Sub-tab Buttons for Weeks -->
+                    <div class="flex flex-wrap gap-2">
+                        {% for wk in all_weeks %}
+                        <button onclick="selectDashboardWeek({{ wk.num }})" id="db-wk-btn-{{ wk.num }}" 
+                                class="px-3.5 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider transition-all 
+                                       {% if wk.num == 1 %}bg-amber-500/10 text-amber-400 border-amber-500/35{% else %}border-neutral-800 text-neutral-500 hover:border-neutral-750{% endif %}">
+                            {{ wk.name }} ({{ wk.menu_name }})
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Weeks Content -->
+                    {% for wk in all_weeks %}
+                    <div id="db-wk-content-{{ wk.num }}" class="{% if wk.num != 1 %}hidden{% endif %} grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {% for item in wk.items %}
+                        <div class="rounded-2xl border border-neutral-900 bg-neutral-950/60 p-4 flex flex-col justify-between hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
+                            <div>
+                                <!-- Gourmet Culinary Image Placeholder -->
+                                <div class="bg-neutral-900 border border-neutral-800 rounded-xl h-44 w-full overflow-hidden mb-4 relative group flex items-center justify-center">
+                                    <img src="{{ item.img }}" alt="{{ item.meal }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/65 to-transparent"></div>
+                                    <span class="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-neutral-950/90 py-1 px-2.5 rounded-lg border border-neutral-800">{{ item.day }}</span>
+                                </div>
+                                
+                                <h3 class="text-sm font-semibold text-white leading-snug">{{ item.meal }}</h3>
+                            </div>
+                            
+                            <!-- Nutrition Tags toggle -->
+                            <div class="mt-4 pt-3 border-t border-neutral-900 flex flex-wrap gap-2">
+                                {% if user.protein_upgrade == 1 %}
+                                    <span class="px-3 py-1.5 rounded-lg border border-amber-500 bg-amber-500/10 text-[9px] font-bold tracking-widest text-amber-400 uppercase">
+                                        Gym Upgrade Macros: 920 Cal / 75g Protein
+                                    </span>
+                                {% else %}
+                                    <div class="px-3 py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-[9px] font-bold tracking-widest text-neutral-400 uppercase">
+                                        Standard Macros: 780 Cal / 55g Protein
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Orders Section -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+                <h2 class="text-xl font-light tracking-wider text-white mb-6 uppercase font-display">Reservation History</h2>
+                
+                {% if recent_order %}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs whitespace-nowrap">
+                            <thead>
+                                <tr class="border-b border-neutral-900 text-neutral-500 uppercase text-[9px] tracking-widest font-bold">
+                                    <th class="py-3">Reservation Number</th>
+                                    <th class="py-3">Request Date</th>
+                                    <th class="py-3">Dues</th>
+                                    <th class="py-3">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-neutral-950">
+                                <tr class="text-neutral-300">
+                                    <td class="py-4 font-bold text-white font-display">#{{ recent_order.order_number }}</td>
+                                    <td class="py-4 text-neutral-500">{{ recent_order.date_created }}</td>
+                                    <td class="py-4 font-bold text-amber-500">${{ "%.2f"|format(recent_order.amount_due) }}</td>
+                                    <td class="py-4">
+                                        {% if recent_order.payment_status == 'Paid' %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25">Settled</span>
+                                        {% else %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/25">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if recent_order.payment_status == 'Unpaid' %}
+                        <div class="mt-4 p-4 rounded-2xl bg-amber-950/20 border border-amber-900/30 text-amber-300 text-xs flex items-center space-x-3">
+                            <svg class="h-5 w-5 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div>
+                                <span class="font-bold">Monday Cash Collection:</span> Please prepare exactly <strong class="text-white font-bold">${{ "%.2f"|format(recent_order.amount_due) }}</strong> in cash for Monday's meal exchange.
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-xs text-neutral-500">No orders prepped or processed yet. Hit the "Secure Weekly Prep" box on the side panel to place your subscription order for the week!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Column 3: Subscription Panel -->
+        <div class="space-y-8">
+            
+            <!-- Order Action Box -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900 relative overflow-hidden group">
+                <div class="absolute -right-8 -top-8 h-20 w-20 bg-amber-500/10 blur-xl"></div>
+                <h3 class="text-lg font-light tracking-wider text-white mb-4 uppercase font-display">Gourmet Intake</h3>
+                <p class="text-xs text-neutral-400 mb-6">Confirm and secure your kitchen container sequence for the upcoming week.</p>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-xs border-b border-neutral-950 pb-3">
+                        <span class="text-neutral-500 uppercase tracking-widest font-bold">Weekly Dues:</span>
+                        <span class="font-bold text-white text-base font-display">${{ "%.2f"|format(weekly_cost) }}</span>
+                    </div>
+
+                    {% if user.current_status == 'Paused' %}
+                        <div class="p-3 bg-neutral-950 rounded-xl border border-neutral-900 text-center text-xs text-neutral-500">
+                            Subscription paused. Reactivate below to unlock weekly ordering.
+                        </div>
+                        <button disabled class="w-full py-3.5 bg-neutral-900 border border-neutral-800 text-neutral-600 font-bold uppercase tracking-widest rounded-xl text-xs cursor-not-allowed font-display">
+                            Subscription Paused
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('checkout') }}" class="block w-full text-center py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-widest rounded-xl btn-glow transition-all font-display">
+                            Secure Weekly Prep
+                        </a>
+                        <p class="text-[9px] text-neutral-500 uppercase tracking-wider text-center">Receipt locks reservation parameters</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Manage Plan Box -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+                <h3 class="text-lg font-light tracking-wider text-white mb-4 uppercase font-display">Adjust Package</h3>
+                
+                <form action="{{ url_for('update_plan') }}" method="POST" class="space-y-5">
+                    <!-- Plan Tier Radio Selection -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Delivery Tier</label>
+                        <div class="space-y-2">
+                            <!-- Hot -->
+                            <label class="relative flex items-center p-3 rounded-xl border border-neutral-900 bg-neutral-950/20 cursor-pointer hover:border-neutral-800 transition-colors {% if hot_spots_full and user.plan_tier != 'Hot' %}opacity-50 cursor-not-allowed{% endif %}">
+                                <input type="radio" name="plan_tier" value="Hot" {% if user.plan_tier == 'Hot' %}checked{% endif %} {% if hot_spots_full and user.plan_tier != 'Hot' %}disabled{% endif %}
+                                       class="h-4 w-4 border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500">
+                                <span class="ml-3 text-xs font-semibold text-white">Daily Fresh-Hot ($50/wk)</span>
+                            </label>
+                            
+                            <!-- Frozen -->
+                            <label class="relative flex items-center p-3 rounded-xl border border-neutral-900 bg-neutral-950/20 cursor-pointer hover:border-neutral-800 transition-colors">
+                                <input type="radio" name="plan_tier" value="Frozen" {% if user.plan_tier == 'Frozen' %}checked{% endif %}
+                                       class="h-4 w-4 border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500">
+                                <span class="ml-3 text-xs font-semibold text-white">Frozen Vault ($55.00/wk)</span>
+                            </label>
+                        </div>
+                        
+                        {% if hot_spots_full and user.plan_tier != 'Hot' %}
+                            <div class="text-[9px] text-amber-500 mt-2 uppercase tracking-wide">
+                                * Hot subscription spots currently full (25/25).
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Gym Upgrade Checkbox -->
+                    <div class="p-3.5 rounded-xl border border-neutral-900 bg-neutral-950/65">
+                        <div class="flex items-center">
+                            <input id="upgrade-checkbox" name="protein_upgrade" type="checkbox" value="1" {% if user.protein_upgrade == 1 %}checked{% endif %}
+                                   class="h-4 w-4 rounded border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500">
+                            <label for="upgrade-checkbox" class="ml-2.5 text-xs font-bold text-white cursor-pointer select-none font-display uppercase tracking-wider">Gym Portion Upgrade</label>
+                        </div>
+                        <p class="text-[10px] text-neutral-500 mt-1 ml-6.5">Enlarges protein portion to 8oz (+ $15/wk).</p>
+                    </div>
+
+                    <!-- Toggle Status (Pause / Resume) -->
+                    <div>
+                        <label for="current_status" class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Member Status</label>
+                        <select id="current_status" name="current_status"
+                                class="w-full px-3 py-3 rounded-xl bg-neutral-950 border border-neutral-900 text-xs font-medium text-white focus:outline-none focus:border-amber-500">
+                            <option value="Active" {% if user.current_status == 'Active' %}selected{% endif %}>Active / Deliver Weekly</option>
+                            <option value="Paused" {% if user.current_status == 'Paused' %}selected{% endif %}>Pause Subscription</option>
+                        </select>
+                        <p class="text-[10px] text-neutral-500 mt-1.5 leading-relaxed">Holds your billing cycle and opens your Hot Tier slot to waitlisted accounts.</p>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-colors border border-neutral-800 font-display">
+                        Confirm Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    function showMenuTab(tabName) {
+        const currentPanel = document.getElementById('current-week-menu-panel');
+        const fourWeekPanel = document.getElementById('four-week-menu-panel');
+        const currentBtn = document.getElementById('tab-btn-current');
+        const fourWeekBtn = document.getElementById('tab-btn-four-week');
+        const simBar = document.getElementById('sim-bar-dashboard');
+
+        if (tabName === 'current') {
+            currentPanel.classList.remove('hidden');
+            fourWeekPanel.classList.add('hidden');
+            simBar.classList.remove('hidden');
+            currentBtn.className = "px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all bg-amber-500/10 text-amber-400 border-amber-500/35";
+            fourWeekBtn.className = "px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all border-neutral-800 text-neutral-555 hover:border-neutral-700";
+        } else {
+            currentPanel.classList.add('hidden');
+            fourWeekPanel.classList.remove('hidden');
+            simBar.classList.add('hidden');
+            currentBtn.className = "px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all border-neutral-800 text-neutral-555 hover:border-neutral-700";
+            fourWeekBtn.className = "px-3 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-widest transition-all bg-amber-500/10 text-amber-400 border-amber-500/35";
+        }
+    }
+
+    function selectDashboardWeek(weekNum) {
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`db-wk-content-${i}`).classList.add('hidden');
+            const btn = document.getElementById(`db-wk-btn-${i}`);
+            btn.className = "px-3.5 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider transition-all border-neutral-800 text-neutral-500 hover:border-neutral-700";
+        }
+        document.getElementById(`db-wk-content-${weekNum}`).classList.remove('hidden');
+        const activeBtn = document.getElementById(`db-wk-btn-${weekNum}`);
+        activeBtn.className = "px-3.5 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider transition-all bg-amber-500/10 text-amber-400 border-amber-500/35";
+    }
+</script>
+{% endblock %}

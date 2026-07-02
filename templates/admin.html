@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Portal | Vault 716{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 space-y-10">
+    
+    <!-- Top Bar & Metrics -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-neutral-900 pb-6 gap-6">
+        <div>
+            <h1 class="text-3xl font-light tracking-wider text-white uppercase font-display">Back-of-House Control</h1>
+            <p class="text-xs text-neutral-500 uppercase tracking-widest mt-1">Vault 716 Culinary Administration Deck</p>
+        </div>
+        
+        <!-- Live Hot Cap Indicator -->
+        <div class="glass-panel py-3.5 px-5 rounded-2xl flex items-center space-x-5 border border-neutral-900 shadow-xl bg-neutral-900/40">
+            <div class="text-left">
+                <span class="block text-[9px] text-neutral-500 uppercase tracking-widest font-bold">Active Hot Placements</span>
+                <span id="active-hot-metric" class="text-xl font-bold text-white font-display mt-0.5 block">
+                    {{ active_hot_count }} / {{ hot_cap }}
+                </span>
+            </div>
+            <div class="h-8 w-px bg-neutral-800"></div>
+            <!-- Status dots -->
+            <div class="flex space-x-1.5">
+                {% for i in range(25) %}
+                    <span class="h-3 w-1 rounded-full {% if i < active_hot_count %}bg-amber-500 shadow shadow-amber-500/10{% else %}bg-neutral-800{% endif %}" title="Placement {{ i + 1 }}"></span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Kitchen Prep Analytics Card -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Kitchen Summary Panel -->
+        <div class="glass-panel p-6 rounded-3xl md:col-span-2 relative overflow-hidden border border-neutral-900 shadow-xl">
+            <div class="absolute right-0 bottom-0 w-36 h-36 bg-amber-500/5 blur-2xl rounded-full"></div>
+            <h3 class="text-xs font-bold text-white uppercase tracking-widest mb-6 font-display flex items-center">
+                <svg class="h-4.5 w-4.5 text-amber-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                Weekend Kitchen Prep Summary
+            </h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Standard Containers -->
+                <div class="bg-neutral-950 rounded-2xl border border-neutral-900 p-4">
+                    <span class="block text-[9px] text-neutral-500 font-bold uppercase tracking-widest">Std Containers</span>
+                    <span class="text-2xl font-bold text-white font-display block mt-1">
+                        {{ kitchen_prep.standard_containers }}
+                    </span>
+                    <span class="text-[9px] text-neutral-600 block mt-0.5">from {{ kitchen_prep.standard_orders }} orders</span>
+                </div>
+                
+                <!-- Gym Containers -->
+                <div class="bg-neutral-950 rounded-2xl border border-neutral-900 p-4">
+                    <span class="block text-[9px] text-neutral-500 font-bold uppercase tracking-widest">Gym Containers</span>
+                    <span class="text-2xl font-bold text-amber-500 font-display block mt-1">
+                        {{ kitchen_prep.gym_containers }}
+                    </span>
+                    <span class="text-[9px] text-neutral-600 block mt-0.5">from {{ kitchen_prep.gym_orders }} orders</span>
+                </div>
+
+                <!-- Total Containers -->
+                <div class="bg-neutral-950 rounded-2xl border border-neutral-900 p-4">
+                    <span class="block text-[9px] text-neutral-500 font-bold uppercase tracking-widest">Total Containers</span>
+                    <span class="text-2xl font-bold text-white font-display block mt-1">
+                        {{ kitchen_prep.standard_containers + kitchen_prep.gym_containers }}
+                    </span>
+                    <span class="text-[9px] text-neutral-600 block mt-0.5">total meal packages</span>
+                </div>
+
+                <!-- Bulk Chicken -->
+                <div class="bg-neutral-950 rounded-2xl border border-amber-500/10 p-4 shadow-inner relative">
+                    <div class="absolute top-2.5 right-2.5 h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping"></div>
+                    <span class="block text-[9px] text-amber-500 font-bold uppercase tracking-widest">Bulk Chicken Lbs</span>
+                    <span class="text-2xl font-bold text-white font-display block mt-1">
+                        {{ kitchen_prep.chicken_lbs }}
+                    </span>
+                    <span class="text-[9px] text-neutral-600 block mt-0.5">standard vs gym weight</span>
+                </div>
+            </div>
+            
+            <div class="mt-5 p-3.5 bg-neutral-900/50 rounded-xl text-[10px] text-neutral-400 flex items-center space-x-2.5">
+                <svg class="h-4.5 w-4.5 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Prep figures represent 5 meals/wk totals. Calculations: Standard (6oz/meal) = 1.875 lbs; Gym Upgraded (8oz/meal) = 2.5 lbs total chicken.</span>
+            </div>
+        </div>
+
+        <!-- System Status Box -->
+        <div class="glass-panel p-6 rounded-3xl border border-neutral-900 shadow-xl flex flex-col justify-between">
+            <div>
+                <h3 class="text-xs font-bold text-white uppercase tracking-widest mb-6 font-display">Service Parameters</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-neutral-500 uppercase tracking-wider text-[9px] font-bold">SQL Database:</span>
+                        <span class="text-neutral-300 font-mono text-[11px]">vault716.db</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-neutral-500 uppercase tracking-wider text-[9px] font-bold">Total Accounts:</span>
+                        <span class="text-white font-bold">{{ users|length }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-neutral-500 uppercase tracking-wider text-[9px] font-bold">Active Orders:</span>
+                        <span class="text-white font-bold">{{ orders|length }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-4 border-t border-neutral-900 flex justify-between items-center mt-6">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25">
+                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400 mr-2 animate-pulse"></span>
+                    Operational
+                </span>
+                <span class="text-[9px] text-neutral-600 font-mono">NODE_LOCAL</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Active Weekly Orders Section -->
+    <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-light tracking-wider text-white uppercase font-display">Active Kitchen Orders</h2>
+            <span class="px-3 py-1 bg-neutral-950 border border-neutral-900 rounded-xl text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                Queue: {{ orders|length }}
+            </span>
+        </div>
+
+        {% if orders %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead>
+                    <tr class="border-b border-neutral-900 text-neutral-500 uppercase text-[9px] tracking-widest font-bold">
+                        <th class="py-3">Order ID</th>
+                        <th class="py-3">Customer Name</th>
+                        <th class="py-3">Phone</th>
+                        <th class="py-3">Tier Type</th>
+                        <th class="py-3">Plan Modifier</th>
+                        <th class="py-3">Amount Due</th>
+                        <th class="py-3">Payment Status</th>
+                        <th class="py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-950">
+                    {% for order in orders %}
+                    <tr id="order-row-{{ order.id }}" class="text-neutral-300">
+                        <td class="py-4 font-bold text-white font-display">#{{ order.order_number }}</td>
+                        <td class="py-4 font-semibold text-white">{{ order.name }}</td>
+                        <td class="py-4 font-mono text-neutral-400">{{ order.phone_number }}</td>
+                        <td class="py-4">
+                            {% if order.plan_tier == 'Hot' %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/20">HOT</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-neutral-900 text-neutral-400 border border-neutral-800">FROZEN</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 text-[10px]">
+                            {% if order.protein_upgrade == 1 %}
+                                <span class="text-amber-500 font-semibold uppercase tracking-wider">Gym Upgrade</span>
+                            {% else %}
+                                <span class="text-neutral-500">Standard</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 font-bold text-white">${{ "%.2f"|format(order.amount_due) }}</td>
+                        <td class="py-4" id="order-status-{{ order.id }}">
+                            {% if order.payment_status == 'Paid' %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25">Paid</span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/25">Unpaid</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 text-right">
+                            {% if order.payment_status == 'Unpaid' %}
+                                <button onclick="markOrderPaid({{ order.id }})" id="pay-btn-{{ order.id }}"
+                                        class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold rounded-lg text-[10px] uppercase tracking-wider transition-colors btn-glow">
+                                    Mark Paid
+                                </button>
+                            {% else %}
+                                <span class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Settled</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-xs text-neutral-500 text-center py-6 uppercase tracking-wider">No active weekly orders queued.</p>
+        {% endif %}
+    </div>
+
+    <!-- Subscriber Profiles Section -->
+    <div class="glass-panel rounded-3xl p-6 shadow-xl border border-neutral-900">
+        <h2 class="text-lg font-light tracking-wider text-white mb-6 uppercase font-display">Subscriber Profiles & Status Controls</h2>
+        
+        {% if users %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead>
+                    <tr class="border-b border-neutral-900 text-neutral-500 uppercase text-[9px] tracking-widest font-bold">
+                        <th class="py-3">Member Info</th>
+                        <th class="py-3">Contact</th>
+                        <th class="py-3">Plan Tier</th>
+                        <th class="py-3">Upgrade Modifier</th>
+                        <th class="py-3">Status</th>
+                        <th class="py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-950">
+                    {% for user in users %}
+                    <tr id="user-row-{{ user.id }}" class="text-neutral-300">
+                        <td class="py-4">
+                            <div class="flex items-center space-x-3.5">
+                                <div class="h-9 w-9 rounded-lg bg-neutral-950 flex items-center justify-center border border-neutral-900 font-bold text-amber-500 text-sm font-display shadow">
+                                    {{ user.name[0]|upper }}
+                                </div>
+                                <div>
+                                    <span class="block font-semibold text-white">{{ user.name }}</span>
+                                    <span class="block text-[10px] text-neutral-500 font-mono mt-0.5">{{ user.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 font-mono text-neutral-400">{{ user.phone_number }}</td>
+                        <td class="py-4">
+                            {% if user.plan_tier == 'Hot' %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/20">HOT</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-neutral-900 text-neutral-400 border border-neutral-800">FROZEN</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4">
+                            {% if user.protein_upgrade == 1 %}
+                                <span class="text-amber-500 font-semibold uppercase tracking-wider text-[10px]">Gym (8oz)</span>
+                            {% else %}
+                                <span class="text-neutral-500 text-[10px]">Standard (6oz)</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4" id="user-status-container-{{ user.id }}">
+                            {% if user.current_status == 'Active' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mr-1.5"></span>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-neutral-900 text-neutral-400 border border-neutral-800">
+                                    Paused
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 text-right space-x-2">
+                            <!-- Toggle Button -->
+                            <button onclick="toggleUserStatus({{ user.id }}, '{{ user.current_status }}')" 
+                                    id="status-toggle-btn-{{ user.id }}"
+                                    class="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-colors
+                                           {% if user.current_status == 'Active' %}
+                                               bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-neutral-800
+                                           {% else %}
+                                               bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30
+                                           {% endif %}">
+                                {% if user.current_status == 'Active' %}
+                                    Pause Member
+                                {% else %}
+                                    Resume Member
+                                {% endif %}
+                            </button>
+                            <!-- Delete Button -->
+                            <button onclick="deleteUser({{ user.id }})"
+                                    class="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-950/30 rounded-lg transition-colors">
+                                Delete Account
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-xs text-neutral-500 text-center py-6 uppercase tracking-wider">No customer accounts registered.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Admin Portal AJAX Javascript Handler -->
+<script>
+    // AJAX: Mark Order as Paid
+    function markOrderPaid(orderId) {
+        const button = document.getElementById(`pay-btn-${orderId}`);
+        const statusCell = document.getElementById(`order-status-${orderId}`);
+        
+        button.disabled = true;
+        button.textContent = 'Processing...';
+
+        fetch(`/admin/order/${orderId}/pay`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusCell.innerHTML = `<span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25">Paid</span>`;
+                button.parentElement.innerHTML = `<span class="text-[9px] text-neutral-600 font-bold uppercase tracking-widest">Settled</span>`;
+            } else {
+                alert(`Error: ${data.error || 'Failed to update order status'}`);
+                button.disabled = false;
+                button.textContent = 'Mark Paid';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('A system connectivity error occurred.');
+            button.disabled = false;
+            button.textContent = 'Mark Paid';
+        });
+    }
+
+    // AJAX: Toggle User Status (Pause <-> Resume)
+    function toggleUserStatus(userId, currentStatus) {
+        const button = document.getElementById(`status-toggle-btn-${userId}`);
+        const statusCell = document.getElementById(`user-status-container-${userId}`);
+        const metric = document.getElementById('active-hot-metric');
+        
+        const action = currentStatus === 'Active' ? 'pause' : 'resume';
+        
+        button.disabled = true;
+        button.textContent = 'Updating...';
+
+        fetch(`/admin/user/${userId}/${action}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                metric.textContent = `${data.active_hot} / {{ hot_cap }}`;
+                
+                if (action === 'pause') {
+                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-neutral-900 text-neutral-400 border border-neutral-800">Paused</span>`;
+                    button.textContent = 'Resume Member';
+                    button.onclick = function() { toggleUserStatus(userId, 'Paused'); };
+                    button.className = 'px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30 transition-colors';
+                } else {
+                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/25"><span class="h-1.5 w-1.5 rounded-full bg-amber-400 mr-1.5"></span>Active</span>`;
+                    button.textContent = 'Pause Member';
+                    button.onclick = function() { toggleUserStatus(userId, 'Active'); };
+                    button.className = 'px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-neutral-800 transition-colors';
+                }
+                button.disabled = false;
+            } else {
+                alert(`Error: ${data.error || 'Failed to update subscription status'}`);
+                button.disabled = false;
+                button.textContent = currentStatus === 'Active' ? 'Pause Member' : 'Resume Member';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('A network error occurred.');
+            button.disabled = false;
+            button.textContent = currentStatus === 'Active' ? 'Pause Member' : 'Resume Member';
+        });
+    }
+
+    // AJAX: Delete User Account
+    function deleteUser(userId) {
+        if (!confirm('Are you sure you want to permanently delete this user account and all their order history? This action is irreversible.')) {
+            return;
+        }
+
+        const row = document.getElementById(`user-row-${userId}`);
+        const metric = document.getElementById('active-hot-metric');
+
+        fetch(`/admin/user/${userId}/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                metric.textContent = `${data.active_hot} / {{ hot_cap }}`;
+                row.style.opacity = 0;
+                setTimeout(() => {
+                    row.remove();
+                }, 300);
+            } else {
+                alert(`Error: ${data.error || 'Failed to delete user'}`);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('A network error occurred.');
+        });
+    }
+</script>
+{% endblock %}

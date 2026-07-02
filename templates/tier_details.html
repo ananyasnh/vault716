@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{% if tier_type == 'fresh-hot' %}Daily Fresh-Hot Vault{% else %}Frozen Vault{% endif %} | Vault 716
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-12 space-y-14 animate-fade-in">
+
+    <!-- Back to Tiers -->
+    <a href="{{ url_for('home') }}" class="inline-flex items-center text-xs uppercase tracking-widest font-bold text-neutral-400 hover:text-amber-500 transition-colors duration-300 group">
+        <svg class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        Back to Tiers
+    </a>
+
+    <!-- ================================================================ -->
+    <!-- PAGE HEADER                                                      -->
+    <!-- ================================================================ -->
+    <div class="text-center space-y-4">
+        {% if tier_type == 'fresh-hot' %}
+            <span class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold uppercase tracking-widest text-amber-400">🔥 Daily Fresh Prep</span>
+            <h1 class="text-3xl sm:text-5xl font-light tracking-[0.2em] text-white uppercase font-display">THE DAILY FRESH-HOT VAULT</h1>
+        {% else %}
+            <span class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-bold uppercase tracking-widest text-amber-400">❄️ Blast Frozen</span>
+            <h1 class="text-3xl sm:text-5xl font-light tracking-[0.2em] text-white uppercase font-display">THE FROZEN VAULT</h1>
+        {% endif %}
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- HOW IT WORKS                                                     -->
+    <!-- ================================================================ -->
+    <div class="rounded-3xl bg-neutral-900/90 backdrop-blur-md border border-neutral-800 p-6 sm:p-8 space-y-6 shadow-xl">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-white font-display flex items-center">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-500 mr-3"></span>
+            How It Works
+        </h2>
+        {% if tier_type == 'fresh-hot' %}
+            <p class="text-sm leading-relaxed text-neutral-400">
+                Our hot meal service is built around ultimate convenience and elite performance nutrition. Meals are cooked fresh daily using clean ingredients, macro-balanced, and hand-delivered hot directly to you. We strictly cap this tier at <span class="text-amber-400 font-semibold">25 members</span> to maintain uncompromising culinary quality.
+            </p>
+        {% else %}
+            <p class="text-sm leading-relaxed text-neutral-400">
+                Designed for ultimate flexibility. We batch-cook your entire week's subscription over the weekend and flash-freeze the containers immediately to lock in freshness, flavor, and macro integrity. Perfect for stocking your dorm or apartment freezer so you can heat and eat exactly on your own schedule.
+            </p>
+        {% endif %}
+
+        <!-- Delivery / Pickup Logistics -->
+        <div class="flex flex-col sm:flex-row gap-4 p-5 rounded-2xl bg-neutral-950/60 border border-neutral-900">
+            <div class="flex items-start gap-3 flex-1">
+                <span class="text-lg mt-0.5">📍</span>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-white">Location</h4>
+                    <p class="text-xs text-neutral-400 mt-1">UB North Campus Stadium Lot (Back Row)</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 flex-1">
+                <span class="text-lg mt-0.5">⏰</span>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-white">Schedule</h4>
+                    <p class="text-xs text-neutral-400 mt-1">Mondays from 6:00 PM – 6:20 PM sharp</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-3 flex-1">
+                <span class="text-lg mt-0.5">🚗</span>
+                <div>
+                    <h4 class="text-[10px] uppercase tracking-widest font-bold text-white">Pickup</h4>
+                    {% if tier_type == 'fresh-hot' %}
+                        <p class="text-xs text-neutral-400 mt-1">Drive-thru trunk pickup keeps your collection seamless and fast.</p>
+                    {% else %}
+                        <p class="text-xs text-neutral-400 mt-1">Pick up your insulated 5-meal box directly from our distribution vehicle.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PORTION SIZES & PRICING                                          -->
+    <!-- ================================================================ -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Standard Plan -->
+        <div class="rounded-2xl bg-neutral-900/90 backdrop-blur-md border border-neutral-800 p-6 flex flex-col justify-between hover:border-neutral-700 transition-colors duration-300">
+            <div>
+                <span class="text-[9px] uppercase tracking-widest font-bold text-neutral-500 block">Standard Plan</span>
+                {% if tier_type == 'fresh-hot' %}
+                    <h3 class="text-base font-bold text-white font-display uppercase tracking-wider mt-1">Standard Hot Plan</h3>
+                    <p class="text-xs text-neutral-400 mt-3 leading-relaxed">
+                        Perfectly balanced, satisfying portions featuring <span class="text-white font-medium">5oz of cooked clean protein</span>, 1.5 cups of complex carbs, and fresh steamed greens. Designed to keep you fueled without feeling heavy.
+                    </p>
+                {% else %}
+                    <h3 class="text-base font-bold text-white font-display uppercase tracking-wider mt-1">Standard Frozen Tier</h3>
+                    <p class="text-xs text-neutral-400 mt-3 leading-relaxed">
+                        Clean, pre-portioned 5-meal frozen sets containing <span class="text-white font-medium">5oz cooked protein</span> and 1.5 cups complex carbs per container. Microwave-ready in under 3 minutes.
+                    </p>
+                {% endif %}
+            </div>
+            <div class="mt-6 flex justify-between items-baseline border-t border-neutral-950 pt-4">
+                <span class="text-2xl font-light text-white font-display">{% if tier_type == 'fresh-hot' %}$50.00{% else %}$55.00{% endif %} <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">/wk</span></span>
+                <span class="text-[9px] uppercase tracking-widest font-bold text-amber-500/80 bg-amber-500/10 px-2 py-1 rounded">5oz Protein</span>
+            </div>
+        </div>
+
+        <!-- High-Protein Gym Upgrade -->
+        <div class="rounded-2xl bg-neutral-900/90 backdrop-blur-md border border-amber-500/20 p-6 flex flex-col justify-between hover:border-amber-500/35 transition-colors duration-300 relative">
+            <span class="absolute top-3 right-3 text-[8px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 py-0.5 px-2 rounded-full">+$15/wk</span>
+            <div>
+                <span class="text-[9px] uppercase tracking-widest font-bold text-amber-500 block">Performance Upgrade</span>
+                <h3 class="text-base font-bold text-white font-display uppercase tracking-wider mt-1">High-Protein Gym Upgrade</h3>
+                {% if tier_type == 'fresh-hot' %}
+                    <p class="text-xs text-neutral-400 mt-3 leading-relaxed">
+                        Engineered for heavy training. Features a massive <span class="text-amber-400 font-medium">8oz portion of cooked clean protein</span>, scaled-back complex carbs (1 cup) to optimize lean macro tracking, and double the micronutrient-dense greens.
+                    </p>
+                {% else %}
+                    <p class="text-xs text-neutral-400 mt-3 leading-relaxed">
+                        Packed with premium fuel. Stamped with an upgraded <span class="text-amber-400 font-medium">8oz cooked protein</span> profile per container to satisfy intense post-workout recovery needs while keeping clean fats tightly controlled.
+                    </p>
+                {% endif %}
+            </div>
+            <div class="mt-6 flex justify-between items-baseline border-t border-neutral-950 pt-4">
+                <span class="text-2xl font-light text-white font-display">{% if tier_type == 'fresh-hot' %}$65.00{% else %}$70.00{% endif %} <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">/wk</span></span>
+                <span class="text-[9px] uppercase tracking-widest font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded">8oz Protein</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- ROTATION A — WEEK 1 & 3 MENU                                     -->
+    <!-- ================================================================ -->
+    <div class="space-y-6">
+        <div class="border-b border-neutral-900 pb-4">
+            <div class="flex items-center gap-3">
+                <span class="h-8 w-1 rounded-full bg-amber-500"></span>
+                <div>
+                    <h2 class="text-xl font-light tracking-[0.15em] text-white uppercase font-display">Rotation A — Week 1 & 3 Menu</h2>
+                    <p class="text-[10px] text-amber-500/70 uppercase tracking-widest mt-1 font-display">5-Dish Lineup · Odd-Week Rotation</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {% for item in week_13 %}
+            <div class="rounded-2xl bg-neutral-900/90 backdrop-blur-md border border-neutral-800 overflow-hidden hover:border-amber-500/20 transition-colors duration-300 flex flex-col {% if loop.last and loop.length is odd %}lg:col-span-2 lg:max-w-[calc(50%-0.75rem)]{% endif %}">
+                <!-- Gourmet Image Block -->
+                <div class="w-full h-48 overflow-hidden relative">
+                    <img src="/static/images/{{ item.meal | lower | replace(' ', '_') | replace('&', 'and') | replace("'", '') }}.jpg"
+                         alt="{{ item.meal }} — Gourmet Dish Presentation"
+                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                         onerror="this.src='{{ item.fallback_img }}';">
+                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent"></div>
+                    <span class="absolute top-3 left-3 px-3 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[9px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-sm">{{ item.day }}</span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-5 sm:p-6 space-y-4 flex-1 flex flex-col">
+                    <h4 class="text-sm font-bold text-white leading-snug font-display uppercase tracking-wide">{{ item.meal }}</h4>
+                    <p class="text-xs text-neutral-400 leading-relaxed">{{ item.description }}</p>
+
+                    <!-- Side Components -->
+                    <div class="flex items-start gap-2 p-3 rounded-xl bg-neutral-950/50 border border-neutral-900/70">
+                        <span class="text-amber-500 text-[10px] mt-0.5 flex-shrink-0">✦</span>
+                        <div>
+                            <span class="text-[9px] uppercase tracking-widest font-bold text-neutral-500 block">Side Components</span>
+                            <p class="text-xs text-neutral-300 mt-0.5">{{ item.sides }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Macro Grids -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
+                        <!-- Standard Macros -->
+                        <div class="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-900 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-500">Standard</span>
+                                <span class="text-[9px] font-bold text-neutral-600">{% if tier_type == 'fresh-hot' %}$50/wk{% else %}$55/wk{% endif %}</span>
+                            </div>
+                            <p class="text-[10px] text-neutral-500 italic">{{ item.std.base }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🔥 {{ item.std.cal }} kcal</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">💪 {{ item.std.protein }}g P</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🌾 {{ item.std.carbs }}g C</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🥑 {{ item.std.fat }}g F</span>
+                            </div>
+                        </div>
+                        <!-- Gym Upgrade Macros -->
+                        <div class="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/15 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-bold uppercase tracking-widest text-amber-500">Gym Upgrade</span>
+                                <span class="text-[9px] font-bold text-amber-500/60">{% if tier_type == 'fresh-hot' %}$65/wk{% else %}$70/wk{% endif %}</span>
+                            </div>
+                            <p class="text-[10px] text-amber-500/40 italic">{{ item.gym.base }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🔥 {{ item.gym.cal }} kcal</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">💪 {{ item.gym.protein }}g P</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🌾 {{ item.gym.carbs }}g C</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🥑 {{ item.gym.fat }}g F</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- ROTATION B — WEEK 2 & 4 MENU                                     -->
+    <!-- ================================================================ -->
+    <div class="space-y-6">
+        <div class="border-b border-neutral-900 pb-4">
+            <div class="flex items-center gap-3">
+                <span class="h-8 w-1 rounded-full bg-amber-500"></span>
+                <div>
+                    <h2 class="text-xl font-light tracking-[0.15em] text-white uppercase font-display">Rotation B — Week 2 & 4 Menu</h2>
+                    <p class="text-[10px] text-amber-500/70 uppercase tracking-widest mt-1 font-display">5-Dish Lineup · Even-Week Rotation</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {% for item in week_24 %}
+            <div class="rounded-2xl bg-neutral-900/90 backdrop-blur-md border border-neutral-800 overflow-hidden hover:border-amber-500/20 transition-colors duration-300 flex flex-col {% if loop.last and loop.length is odd %}lg:col-span-2 lg:max-w-[calc(50%-0.75rem)]{% endif %}">
+                <!-- Gourmet Image Block -->
+                <div class="w-full h-48 overflow-hidden relative">
+                    <img src="/static/images/{{ item.meal | lower | replace(' ', '_') | replace('&', 'and') | replace("'", '') }}.jpg"
+                         alt="{{ item.meal }} — Gourmet Dish Presentation"
+                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                         onerror="this.src='{{ item.fallback_img }}';">
+                    <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/70 via-transparent to-transparent"></div>
+                    <span class="absolute top-3 left-3 px-3 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[9px] font-bold uppercase tracking-widest text-amber-400 backdrop-blur-sm">{{ item.day }}</span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-5 sm:p-6 space-y-4 flex-1 flex flex-col">
+                    <h4 class="text-sm font-bold text-white leading-snug font-display uppercase tracking-wide">{{ item.meal }}</h4>
+                    <p class="text-xs text-neutral-400 leading-relaxed">{{ item.description }}</p>
+
+                    <!-- Side Components -->
+                    <div class="flex items-start gap-2 p-3 rounded-xl bg-neutral-950/50 border border-neutral-900/70">
+                        <span class="text-amber-500 text-[10px] mt-0.5 flex-shrink-0">✦</span>
+                        <div>
+                            <span class="text-[9px] uppercase tracking-widest font-bold text-neutral-500 block">Side Components</span>
+                            <p class="text-xs text-neutral-300 mt-0.5">{{ item.sides }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Macro Grids -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto">
+                        <!-- Standard Macros -->
+                        <div class="p-3.5 rounded-2xl bg-neutral-950/80 border border-neutral-900 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-bold uppercase tracking-widest text-neutral-500">Standard</span>
+                                <span class="text-[9px] font-bold text-neutral-600">{% if tier_type == 'fresh-hot' %}$50/wk{% else %}$55/wk{% endif %}</span>
+                            </div>
+                            <p class="text-[10px] text-neutral-500 italic">{{ item.std.base }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🔥 {{ item.std.cal }} kcal</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">💪 {{ item.std.protein }}g P</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🌾 {{ item.std.carbs }}g C</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[9px] font-bold text-neutral-300">🥑 {{ item.std.fat }}g F</span>
+                            </div>
+                        </div>
+                        <!-- Gym Upgrade Macros -->
+                        <div class="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/15 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-bold uppercase tracking-widest text-amber-500">Gym Upgrade</span>
+                                <span class="text-[9px] font-bold text-amber-500/60">{% if tier_type == 'fresh-hot' %}$65/wk{% else %}$70/wk{% endif %}</span>
+                            </div>
+                            <p class="text-[10px] text-amber-500/40 italic">{{ item.gym.base }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🔥 {{ item.gym.cal }} kcal</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">💪 {{ item.gym.protein }}g P</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🌾 {{ item.gym.carbs }}g C</span>
+                                <span class="px-2 py-0.5 rounded bg-neutral-900 border border-amber-500/20 text-[9px] font-bold text-amber-400">🥑 {{ item.gym.fat }}g F</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- CALL TO ACTION                                                   -->
+    <!-- ================================================================ -->
+    <div class="pt-4 text-center space-y-3">
+        {% if tier_type == 'fresh-hot' and hot_spots_full %}
+            <button disabled class="w-full sm:w-auto px-12 py-4 bg-neutral-900 border border-neutral-800 text-neutral-600 font-bold uppercase tracking-widest rounded-xl text-xs cursor-not-allowed font-display">
+                Hot Placements Sold Out
+            </button>
+            <p class="text-[10px] text-amber-400 uppercase tracking-wider">Join waitlist via the Frozen Vault</p>
+        {% else %}
+            <a href="{{ url_for('register', plan_tier='Hot' if tier_type == 'fresh-hot' else 'Frozen') }}"
+               class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
+                {% if tier_type == 'fresh-hot' %}Lock In Fresh-Hot Tier{% else %}Lock In Frozen Tier{% endif %}
+            </a>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
