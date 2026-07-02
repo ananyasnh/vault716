@@ -354,14 +354,15 @@ def register():
         return redirect(url_for('home'))
         
     if request.method == 'POST':
-        name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         phone = request.form.get('phone', '').strip()
         
-        if not name or not email or not password or not phone:
+        if not email or not password or not phone:
             flash("All fields are required.", "error")
             return render_template('register.html')
+            
+        name = email.split('@')[0].capitalize()
             
         db = get_db()
         cursor = db.cursor()
