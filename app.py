@@ -1,12 +1,18 @@
 import os
 import sqlite3
 import datetime
+from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'vault716_secure_session_token_1984!')
+app.permanent_session_lifetime = timedelta(days=30)
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'vault716.db')
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 
 HOT_MEAL_CAP = 25
 FROZEN_MEAL_CAP = 15
