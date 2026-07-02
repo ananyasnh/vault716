@@ -120,8 +120,39 @@
     </div>
 </div>
 
+<!-- Safety & Allergy Warning Modal -->
+<div id="safety-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-neutral-900 border border-red-500/30 rounded-2xl p-6 sm:p-8 max-w-md mx-auto relative space-y-6 shadow-2xl animate-fade-in">
+        <h3 class="text-base font-bold text-red-500 tracking-wider font-display text-center uppercase flex items-center justify-center gap-2">
+            ⚠️ CRITICAL SAFETY & DIETARY NOTICE
+        </h3>
+        
+        <div class="space-y-4 text-xs text-neutral-300 leading-relaxed font-sans">
+            <p>
+                <strong>• ALLERGY WARNING:</strong> Vault 716 meals are prepared in a performance facility that processes poultry, dairy, nuts, wheat, soy, and gluten. If you have severe, life-threatening food allergies, DO NOT apply.
+            </p>
+            <p>
+                <strong>• DIETARY RESTRICTIONS:</strong> Our weekly meal rotation heavily utilizes chicken poultry across 100% of our dishes. We currently cannot accommodate fully custom vegan, vegetarian, or restrictive halal modifications.
+            </p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <button type="button" id="btn-modal-cancel" class="flex-1 py-3 border border-neutral-800 rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors font-display">
+                Never Mind / Go Back
+            </button>
+            <button type="button" id="btn-modal-confirm" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors font-display shadow-lg shadow-red-600/10">
+                I Certify & Continue
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // YOUR WHATSAPP NUMBER PLACEHOLDER
+    const myWhatsAppNumber = "1716XXXXXXX";
+
     document.addEventListener("DOMContentLoaded", function() {
+        // Query param checks
         const urlParams = new URLSearchParams(window.location.search);
         const planTier = urlParams.get('plan_tier');
         
@@ -135,6 +166,53 @@
             if (frozenRadio) {
                 frozenRadio.checked = true;
             }
+        }
+
+        // Modal elements
+        const form = document.querySelector('form');
+        const safetyModal = document.getElementById('safety-modal');
+        const btnCancel = document.getElementById('btn-modal-cancel');
+        const btnConfirm = document.getElementById('btn-modal-confirm');
+
+        if (form && safetyModal && btnCancel && btnConfirm) {
+            form.addEventListener('submit', function(event) {
+                // Intercept submit
+                event.preventDefault();
+                // Show safety modal
+                safetyModal.classList.remove('hidden');
+            });
+
+            btnCancel.addEventListener('click', function() {
+                // Close modal
+                safetyModal.classList.add('hidden');
+            });
+
+            btnConfirm.addEventListener('click', function() {
+                // Close modal
+                safetyModal.classList.add('hidden');
+
+                // Read input values
+                const nameVal = document.getElementById('name').value;
+                const phoneVal = document.getElementById('phone').value;
+                
+                const isHotSelected = document.getElementById('tier-hot') && document.getElementById('tier-hot').checked;
+                const tierRequested = isHotSelected ? "Fresh-Hot" : "Weekly-Frozen";
+                
+                const isGymUpgrade = document.getElementById('protein_upgrade') && document.getElementById('protein_upgrade').checked;
+                const macroAllocation = isGymUpgrade ? "High-Protein Gym Upgrade" : "Standard";
+
+                // Construct text message
+                const message = `Vault 716 Application 🚀\nName: ${nameVal}\nPhone: ${phoneVal}\nTier Requested: ${tierRequested}\nMacro Allocation: ${macroAllocation}`;
+                
+                // Construct URL
+                const whatsappUrl = `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+                
+                // Redirect/open tab
+                window.open(whatsappUrl, '_blank');
+                
+                // Submit form to backend
+                form.submit();
+            });
         }
     });
 </script>
