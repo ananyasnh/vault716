@@ -288,30 +288,23 @@
             Our weekly meal service begins promptly this coming Monday. Because we carefully source fresh ingredients in advance to guarantee top-tier quality for our 25-member roster, we kindly ask that you only apply if you are fully ready to commit to the schedule. If the timing isn’t right for you just yet, no worries at all! Our doors are always open for you to apply down the road whenever you're ready to hit your nutrition goals.
         </div>
 
-        {% if tier_type == 'fresh-hot' %}
-            {% if hot_spots_full %}
-                <a href="{{ url_for('register', plan_tier='Hot') }}"
-                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 bg-red-950/20 hover:bg-red-950/40 transition-all duration-300 font-display shadow-lg">
-                    Roster Full — Join Fresh-Hot Waitlist
+        {% if session.get('user_id') %}
+            {% if tier_type == 'fresh-hot' %}
+                <a href="{{ url_for('checkout', tier_type='fresh-hot') }}"
+                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
+                    Apply for Fresh-Hot Membership
                 </a>
             {% else %}
-                <a href="{{ url_for('register', plan_tier='Hot') }}"
+                <a href="{{ url_for('checkout', tier_type='weekly-frozen') }}"
                    class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
-                    Lock In Fresh-Hot Tier
+                    Apply for Weekly-Frozen Membership
                 </a>
             {% endif %}
         {% else %}
-            {% if frozen_spots_full %}
-                <a href="{{ url_for('register', plan_tier='Frozen') }}"
-                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-red-500/30 rounded-xl text-xs font-bold uppercase tracking-widest text-red-400 bg-red-950/20 hover:bg-red-950/40 transition-all duration-300 font-display shadow-lg">
-                    Roster Full — Join Frozen Waitlist
-                </a>
-            {% else %}
-                <a href="{{ url_for('register', plan_tier='Frozen') }}"
-                   class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
-                    Lock In Frozen Tier
-                </a>
-            {% endif %}
+            <a href="{{ url_for('login', next=request.path) }}"
+               class="w-full sm:w-auto inline-flex justify-center px-12 py-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all duration-300 font-display shadow-lg">
+                Sign In to Apply
+            </a>
         {% endif %}
     </div>
 

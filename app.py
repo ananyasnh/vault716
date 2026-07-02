@@ -348,95 +348,114 @@ def tier_detail(tier_type):
         frozen_spots_full=frozen_spots_full
     )
 
-@app.route('/register', methods=['GET'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'user_id' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('home'))
         
-    active_hot = get_active_hot_subscribers()
-    active_frozen = get_active_frozen_subscribers()
-    hot_spots_full = (active_hot >= HOT_MEAL_CAP)
-    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
-    return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-
-@app.route('/apply', methods=['POST'])
-def apply():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        phone = request.form.get('phone', '').strip()
         
-    active_hot = get_active_hot_subscribers()
-    active_frozen = get_active_frozen_subscribers()
-    hot_spots_full = (active_hot >= HOT_MEAL_CAP)
-    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
-
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip().lower()
-    password = request.form.get('password', '')
-    phone = request.form.get('phone', '').strip()
-    plan_tier = request.form.get('plan_tier', 'Frozen')
-    protein_upgrade = 1 if request.form.get('protein_upgrade') else 0
-    
-    # Validation
-    if not name or not email or not password or not phone:
-        flash("All fields are required.", "error")
-        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-        
-    if (plan_tier == 'Hot' and hot_spots_full) or (plan_tier == 'Frozen' and frozen_spots_full):
-        # Route to waitlist instead if cap reached
+        if not name or not email or not password or not phone:
+            flash("All fields are required.", "error")
+            return render_template('register.html')
+            
         db = get_db()
+        cursor = db.cursor()
+        
+        # Check duplicate email
+        cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
+        if cursor.fetchone():
+            flash("Email address is already registered.", "error")
+            return render_template('register.html')
+            
         try:
-            db.execute('''
-                INSERT INTO waitlist (name, email, phone_number, plan_tier, protein_upgrade)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (name, email, phone, plan_tier, protein_upgrade))
+            password_hash = generate_password_hash(password)
+            cursor.execute('''
+                INSERT INTO users (name, email, password_hash, phone_number, plan_tier, protein_upgrade, current_status)
+                VALUES (?, ?, ?, ?, 'None', 0, 'Pending')
+            ''', (name, email, password_hash, phone))
             db.commit()
-            weekly_cost = calculate_amount(plan_tier, protein_upgrade)
-            flash("Spot cap reached! You have been successfully added to our Priority Waitlist.", "success")
-            return render_template(
-                'waitlist_success.html',
-                name=name,
-                email=email,
-                phone=phone,
-                plan_tier=plan_tier,
-                protein_upgrade=protein_upgrade,
-                weekly_cost=weekly_cost,
-                whatsapp_link=WHATSAPP_LINK
-            )
-        except Exception:
+            
+            # Log user in
+            user_id = cursor.lastrowid
+            session['user_id'] = user_id
+            session['user_name'] = name
+            
+            flash("Account created successfully! Select a subscription tier below to lock in your spot.", "success")
+            return redirect(url_for('home'))
+        except Exception as e:
             db.rollback()
             flash("An error occurred. Please try again.", "error")
-            return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-
-    db = get_db()
-    cursor = db.cursor()
-    
-    # Check duplicate email
-    cursor.execute("SELECT id FROM users WHERE email = ?", (email,))
-    if cursor.fetchone():
-        flash("Email address is already registered.", "error")
-        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
-        
-    try:
-        password_hash = generate_password_hash(password)
-        cursor.execute('''
-            INSERT INTO users (name, email, password_hash, phone_number, plan_tier, protein_upgrade, current_status)
-            VALUES (?, ?, ?, ?, ?, ?, 'Active')
-        ''', (name, email, password_hash, phone, plan_tier, protein_upgrade))
-        db.commit()
-        
-        # Log user in
-        user_id = cursor.lastrowid
-        session['user_id'] = user_id
-        session['user_name'] = name
-        
-        flash("Account created successfully!", "success")
-        return redirect(url_for('dashboard'))
-    except Exception as e:
-        db.rollback()
-        flash("An error occurred. Please try again.", "error")
-        return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+            return render_template('register.html')
             
-    return render_template('register.html', hot_spots_full=hot_spots_full, frozen_spots_full=frozen_spots_full)
+    return render_template('register.html')
+
+@app.route('/checkout/<tier_type>', methods=['GET', 'POST'])
+def checkout(tier_type):
+    if 'user_id' not in session:
+        return redirect(url_for('login', next=request.path))
+        
+    if tier_type not in ['fresh-hot', 'weekly-frozen']:
+        return redirect(url_for('home'))
+        
+    active_hot = get_active_hot_subscribers()
+    active_frozen = get_active_frozen_subscribers()
+    hot_spots_full = (active_hot >= HOT_MEAL_CAP)
+    frozen_spots_full = (active_frozen >= FROZEN_MEAL_CAP)
+    
+    db = get_db()
+    user = query_db("SELECT * FROM users WHERE id = ?", (session['user_id'],), one=True)
+    if not user:
+        session.clear()
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        chosen_tier = 'Hot' if tier_type == 'fresh-hot' else 'Frozen'
+        protein_upgrade = 1 if request.form.get('protein_upgrade') else 0
+        
+        # Check counter capacity rule
+        if chosen_tier == 'Hot' and hot_spots_full:
+            flash("Roster is full. Standard Fresh-Hot checkout blocked.", "error")
+            return redirect(url_for('checkout', tier_type=tier_type))
+        if chosen_tier == 'Frozen' and frozen_spots_full:
+            flash("Frozen Vault is currently full.", "error")
+            return redirect(url_for('checkout', tier_type=tier_type))
+            
+        try:
+            db.execute('''
+                UPDATE users 
+                SET plan_tier = ?, protein_upgrade = ?, current_status = 'Active'
+                WHERE id = ?
+            ''', (chosen_tier, protein_upgrade, session['user_id']))
+            
+            # Generate first order
+            order_number = generate_order_number()
+            amount_due = calculate_amount(chosen_tier, protein_upgrade)
+            db.execute('''
+                INSERT INTO orders (user_id, order_number, amount_due, payment_status)
+                VALUES (?, ?, ?, 'Unpaid')
+            ''', (session['user_id'], order_number, amount_due))
+            
+            db.commit()
+            flash("Subscription successfully activated! Welcome to Vault 716.", "success")
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            db.rollback()
+            flash("An error occurred during checkout. Please try again.", "error")
+            return redirect(url_for('checkout', tier_type=tier_type))
+            
+    return render_template(
+        'checkout.html',
+        tier_type=tier_type,
+        hot_spots_full=hot_spots_full,
+        frozen_spots_full=frozen_spots_full,
+        user=user,
+        whatsapp_link=WHATSAPP_LINK
+    )
 
 @app.route('/api/waitlist', methods=['POST'])
 def api_waitlist():
@@ -448,7 +467,7 @@ def api_waitlist():
     
     if not name or not email or not phone:
         flash("All fields are required to join the waitlist.", "error")
-        return redirect(url_for('register'))
+        return redirect(url_for('home'))
         
     db = get_db()
     try:
@@ -472,20 +491,22 @@ def api_waitlist():
     except Exception as e:
         db.rollback()
         flash("An error occurred. Please try again.", "error")
-        return redirect(url_for('register'))
+        return redirect(url_for('home'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'user_id' in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('home'))
         
+    next_page = request.args.get('next') or request.form.get('next')
+    
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
         
         if not email or not password:
             flash("Email and password are required.", "error")
-            return render_template('login.html')
+            return render_template('login.html', next=next_page)
             
         user = query_db("SELECT * FROM users WHERE email = ?", (email,), one=True)
         
@@ -493,11 +514,13 @@ def login():
             session['user_id'] = user['id']
             session['user_name'] = user['name']
             flash(f"Welcome back, {user['name']}!", "success")
-            return redirect(url_for('dashboard'))
+            if next_page:
+                return redirect(next_page)
+            return redirect(url_for('home'))
         else:
             flash("Invalid email or password.", "error")
             
-    return render_template('login.html')
+    return render_template('login.html', next=next_page)
 
 @app.route('/logout')
 def logout():
@@ -626,90 +649,6 @@ def submit_review():
         
     return redirect(url_for('dashboard'))
 
-@app.route('/checkout')
-def checkout():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    user = query_db("SELECT * FROM users WHERE id = ?", (session['user_id'],), one=True)
-    if not user:
-        return redirect(url_for('login'))
-        
-    if user['current_status'] == 'Paused':
-        flash("Your subscription is currently paused. Please activate it on your dashboard first.", "warning")
-        return redirect(url_for('dashboard'))
-        
-    # Re-evaluate Hot Tier Cap in case it filled up
-    active_hot = get_active_hot_subscribers()
-    hot_spots_full = (active_hot >= HOT_MEAL_CAP)
-    
-    # If the user is on Hot tier but the spot cap is exceeded and they weren't counted, or if they want to switch
-    weekly_cost = calculate_amount(user['plan_tier'], user['protein_upgrade'])
-    
-    return render_template(
-        'checkout.html',
-        user=user,
-        weekly_cost=weekly_cost,
-        hot_spots_full=hot_spots_full
-    )
-
-@app.route('/submit-order', methods=['POST'])
-def submit_order():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    db = get_db()
-    user = query_db("SELECT * FROM users WHERE id = ?", (session['user_id'],), one=True)
-    if not user:
-        return redirect(url_for('login'))
-        
-    if user['current_status'] == 'Paused':
-        flash("Your subscription is paused. Please resume it to place weekly orders.", "error")
-        return redirect(url_for('dashboard'))
-        
-    # Calculate amount due
-    weekly_cost = calculate_amount(user['plan_tier'], user['protein_upgrade'])
-    
-    # Generate 4-digit order number
-    # Find maximum order number in orders
-    cursor = db.cursor()
-    cursor.execute("SELECT MAX(order_number) FROM orders")
-    max_order = cursor.fetchone()[0]
-    
-    if max_order is None:
-        order_number = 1000
-    else:
-        order_number = max_order + 1
-        
-    try:
-        db.execute('''
-            INSERT INTO orders (user_id, order_number, amount_due, payment_status)
-            VALUES (?, ?, ?, 'Unpaid')
-        ''', (user['id'], order_number, weekly_cost))
-        db.commit()
-        return redirect(url_for('success', order_number=order_number))
-    except Exception as e:
-        db.rollback()
-        flash("Failed to process order. Please try again.", "error")
-        return redirect(url_for('checkout'))
-
-@app.route('/success/<int:order_number>')
-def success(order_number):
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-        
-    order = query_db("""
-        SELECT o.*, u.name, u.email 
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        WHERE o.order_number = ? AND o.user_id = ?
-    """, (order_number, session['user_id']), one=True)
-    
-    if not order:
-        flash("Order not found.", "error")
-        return redirect(url_for('dashboard'))
-        
-    return render_template('success.html', order=order, whatsapp_link=WHATSAPP_LINK)
 
 # -------------------------------------------------------------
 # PRIVATE ADMIN PORTAL ROUTES

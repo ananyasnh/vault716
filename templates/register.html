@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Apply Membership | Vault 716{% endblock %}
+{% block title %}Sign Up | Vault 716{% endblock %}
 
 {% block content %}
 <div class="py-12 sm:py-16 flex items-center justify-center px-4">
@@ -9,11 +9,11 @@
         <div class="absolute -top-10 -right-10 w-24 h-24 rounded-full bg-amber-500/5 blur-xl"></div>
         
         <div class="text-center mb-8">
-            <h2 class="text-2xl font-light tracking-[0.2em] text-white uppercase font-display">Membership Application</h2>
+            <h2 class="text-2xl font-light tracking-[0.2em] text-white uppercase font-display">Create Account</h2>
             <p class="mt-2 text-xs uppercase tracking-widest text-amber-500/70">Vault 716 Culinary Subscriptions</p>
         </div>
 
-        <form action="{{ url_for('apply') }}" method="POST" class="space-y-5">
+        <form action="{{ url_for('register') }}" method="POST" class="space-y-5">
             <!-- Full Name -->
             <div>
                 <label for="name" class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-2">Full Name</label>
@@ -42,78 +42,11 @@
                        class="w-full px-4 py-3.5 rounded-xl bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none text-white text-xs placeholder-neutral-700 transition-colors">
             </div>
 
-            <!-- Plan Tier Options -->
-            <div>
-                <span class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-3">Subscription Tier</span>
-                
-                <div class="space-y-3">
-                    <!-- Daily Fresh-Hot -->
-                    <label id="label-tier-hot" class="relative block rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 cursor-pointer hover:border-neutral-750 transition-all {% if hot_spots_full %}opacity-50 cursor-not-allowed select-none bg-neutral-950/20{% endif %}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input type="radio" id="tier-hot" name="plan_tier" value="Hot"
-                                       {% if hot_spots_full %}disabled{% endif %}
-                                       class="h-4 w-4 border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-neutral-950">
-                                <div class="ml-3">
-                                    <span class="block text-xs font-bold text-white font-display uppercase tracking-wider">Daily Fresh-Hot Pickup</span>
-                                    <span class="block text-[10px] text-neutral-500 mt-0.5">Prepped hot Mon-Fri</span>
-                                </div>
-                            </div>
-                            <span class="text-xs font-semibold text-amber-500">$50/wk</span>
-                        </div>
-                    </label>
-
-                    <!-- Hot spots limit notice -->
-                    {% if hot_spots_full %}
-                    <div class="text-[10px] text-amber-400 bg-amber-950/20 border border-amber-900/30 rounded-xl p-3 flex items-start space-x-2">
-                        <svg class="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        <span>Daily Fresh-Hot spots are currently full! Select the Frozen Vault plan to lock in your meals.</span>
-                    </div>
-                    {% endif %}
-
-                    <!-- Weekly Frozen Box -->
-                    <label id="label-tier-frozen" class="relative block rounded-2xl border border-neutral-800 bg-neutral-950/60 p-4 cursor-pointer hover:border-neutral-755 transition-all">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input type="radio" id="tier-frozen" name="plan_tier" value="Frozen" checked
-                                       class="h-4 w-4 border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-neutral-950">
-                                <div class="ml-3">
-                                    <span class="block text-xs font-bold text-white font-display uppercase tracking-wider">Frozen Vault</span>
-                                    <span class="block text-[10px] text-neutral-500 mt-0.5">5 frozen meals prepped together</span>
-                                </div>
-                            </div>
-                            <span class="text-xs font-semibold text-amber-500">$55.00/wk</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Gym Modifier Checkbox -->
-            <div class="p-4 rounded-2xl border border-neutral-800 bg-neutral-950/40 relative overflow-hidden group">
-                <div class="flex items-start">
-                    <div class="flex h-5 items-center">
-                        <input id="protein_upgrade" name="protein_upgrade" type="checkbox" value="1"
-                               class="h-4 w-4 rounded border-neutral-800 bg-neutral-950 text-amber-500 focus:ring-amber-500 focus:ring-offset-neutral-950">
-                    </div>
-                    <div class="ml-3 text-xs">
-                        <label for="protein_upgrade" class="font-bold text-white cursor-pointer select-none font-display uppercase tracking-wider">High-Protein Gym Upgrade</label>
-                        <p class="text-[10px] text-neutral-400 mt-0.5">Upgrade protein sizes from standard 6oz to 8oz (+ $15/wk).</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mindset Warning Notice -->
-            <div class="p-4 rounded-2xl bg-amber-950/20 border border-amber-900/30 text-amber-300 text-[10px] text-center leading-relaxed font-sans">
-                Our weekly meal service begins promptly this coming Monday. Because we carefully source fresh ingredients in advance to guarantee top-tier quality for our 25-member roster, we kindly ask that you only apply if you are fully ready to commit to the schedule. If the timing isn’t right for you just yet, no worries at all! Our doors are always open for you to apply down the road whenever you're ready to hit your nutrition goals.
-            </div>
-
             <!-- Submit -->
             <div class="pt-2">
                 <button type="submit"
                         class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-950 bg-amber-500 hover:bg-amber-400 btn-glow transition-all font-display focus:outline-none">
-                    Submit Application
+                    Create Account
                 </button>
             </div>
         </form>
@@ -124,144 +57,4 @@
         </div>
     </div>
 </div>
-
-<!-- Safety & Allergy Warning Modal -->
-<div id="safety-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-neutral-900 border border-red-500/30 rounded-2xl p-6 sm:p-8 max-w-md mx-auto relative space-y-6 shadow-2xl animate-fade-in">
-        <h3 class="text-base font-bold text-red-500 tracking-wider font-display text-center uppercase flex items-center justify-center gap-2">
-            ⚠️ CRITICAL SAFETY & DIETARY NOTICE
-        </h3>
-        
-        <div class="space-y-4 text-xs text-neutral-300 leading-relaxed font-sans">
-            <p>
-                <strong>• ALLERGY WARNING:</strong> Vault 716 meals are prepared in a performance facility that processes poultry, dairy, nuts, wheat, soy, and gluten. If you have severe, life-threatening food allergies, DO NOT apply.
-            </p>
-            <p>
-                <strong>• DIETARY RESTRICTIONS:</strong> Our weekly meal rotation heavily utilizes chicken poultry across 100% of our dishes. We currently cannot accommodate fully custom vegan, vegetarian, or restrictive halal modifications.
-            </p>
-        </div>
-
-        <div class="flex flex-col sm:flex-row gap-3 pt-2">
-            <button type="button" id="btn-modal-cancel" class="flex-1 py-3 border border-neutral-800 rounded-xl text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors font-display">
-                Never Mind / Go Back
-            </button>
-            <button type="button" id="btn-modal-confirm" class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-colors font-display shadow-lg shadow-red-600/10">
-                I Certify & Continue
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Post-Signup Welcome & Billing Modal -->
-<div id="welcome-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-neutral-900 border border-amber-500/30 rounded-2xl p-6 sm:p-8 max-w-md mx-auto relative space-y-6 shadow-2xl animate-fade-in">
-        <h3 class="text-base font-bold text-amber-500 tracking-wider font-display text-center uppercase flex items-center justify-center gap-2">
-            🎉 APPLICATION STAGED: HOW IT WORKS
-        </h3>
-        
-        <div class="space-y-4 text-xs text-neutral-300 leading-relaxed font-sans">
-            <p>
-                <strong>• IMMEDIATE START:</strong> Your meal service officially begins this coming Monday.
-            </p>
-            <p>
-                <strong>• WEEKLY BILLING CYCLE:</strong> Payment for your first week is due on Monday when you collect your meals. To secure your following weeks, payment for the next week must be sent every consecutive Friday.
-            </p>
-            <p>
-                <strong>• UPFRONT MONTHLY OPTION:</strong> Prefer hands-off convenience? You can pay for your entire month upfront ($200 for Standard, or the corresponding sum adjusted for your Gym Upgrade tier) on your very first Monday pickup.
-            </p>
-        </div>
-
-        <div class="pt-2">
-            <button type="button" id="btn-welcome-agree" class="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors font-display shadow-lg btn-glow font-sans">
-                I Agree to the Terms — Get my WhatsApp Access Link
-            </button>
-        </div>
-    </div>
-</div>
-
-<script>
-    // YOUR WHATSAPP NUMBER PLACEHOLDER
-    const myWhatsAppNumber = "14033344500";
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Query param checks
-        const urlParams = new URLSearchParams(window.location.search);
-        const planTier = urlParams.get('plan_tier');
-        
-        if (planTier === 'Hot') {
-            const hotRadio = document.getElementById('tier-hot');
-            if (hotRadio && !hotRadio.disabled) {
-                hotRadio.checked = true;
-            }
-        } else if (planTier === 'Frozen') {
-            const frozenRadio = document.getElementById('tier-frozen');
-            if (frozenRadio) {
-                frozenRadio.checked = true;
-            }
-        }
-
-        // Modal elements
-        const form = document.querySelector('form');
-        const safetyModal = document.getElementById('safety-modal');
-        const welcomeModal = document.getElementById('welcome-modal');
-        const btnCancel = document.getElementById('btn-modal-cancel');
-        const btnConfirm = document.getElementById('btn-modal-confirm');
-        const btnAgree = document.getElementById('btn-welcome-agree');
-
-        if (form && safetyModal && welcomeModal && btnCancel && btnConfirm && btnAgree) {
-            form.addEventListener('submit', function(event) {
-                // Intercept submit
-                event.preventDefault();
-                // Show safety modal
-                safetyModal.classList.remove('hidden');
-            });
-
-            btnCancel.addEventListener('click', function() {
-                // Close modal
-                safetyModal.classList.add('hidden');
-            });
-
-            btnConfirm.addEventListener('click', function() {
-                // Close safety modal and open welcome modal
-                safetyModal.classList.add('hidden');
-                welcomeModal.classList.remove('hidden');
-            });
-
-            btnAgree.addEventListener('click', function() {
-                // Close welcome modal
-                welcomeModal.classList.add('hidden');
-
-                // Read input values
-                const nameVal = document.getElementById('name').value;
-                const phoneVal = document.getElementById('phone').value;
-                
-                const isHotSelected = document.getElementById('tier-hot') && document.getElementById('tier-hot').checked;
-                const tierRequested = isHotSelected ? "Fresh-Hot" : "Weekly-Frozen";
-                
-                const isGymUpgrade = document.getElementById('protein_upgrade') && document.getElementById('protein_upgrade').checked;
-                const macroAllocation = isGymUpgrade ? "High-Protein Gym Upgrade" : "Standard";
-
-                // Construct text message
-                const message = `Vault 716 Application Confirmation 🚀\n\nName: ${nameVal}\nPhone: ${phoneVal}\nTier: ${tierRequested}\nPlan: ${macroAllocation}\n\nCONFIRMATIONS:\n1. I confirm I am ready to start immediately this coming Monday.\n2. I understand this is an elite culinary performance service, not a casual trial.\n3. I am super serious about locking in this spot.\n4. I agree to the Friday/Monthly prepayment cycles outlined on the site.\n\nAm I ready to lock it in and receive the private VIP group chat link? YES.`;
-                
-                // Construct URL
-                const whatsappUrl = `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(message)}`;
-                
-                // Redirect/open tab
-                window.open(whatsappUrl, '_blank');
-                
-                // Check if selected tier is full on the server side
-                const isHotFull = {% if hot_spots_full %}true{% else %}false{% endif %};
-                const isFrozenFull = {% if frozen_spots_full %}true{% else %}false{% endif %};
-                
-                if ((tierRequested === "Fresh-Hot" && isHotFull) || (tierRequested === "Weekly-Frozen" && isFrozenFull)) {
-                    form.action = "/api/waitlist";
-                }
-                
-                // Submit form to backend
-                form.submit();
-            });
-        }
-    });
-</script>
 {% endblock %}
