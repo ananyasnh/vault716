@@ -215,14 +215,14 @@ def init_db():
             
             # Calculate and insert orders
             # Order 1000 - John Doe (Hot, Standard -> $50.00)
-            # Order 1001 - Jane Smith (Hot, Gym -> $65.00)
+            # Order 1001 - Jane Smith (Hot, Gym -> $70.00)
             # Order 1002 - Bob Johnson (Frozen, Standard -> $55.00)
-            # Order 1003 - Alice Williams (Frozen, Gym -> $70.00)
+            # Order 1003 - Alice Williams (Frozen, Gym -> $75.00)
             sample_orders = [
                 (users_map['john@vault716.com']['id'], 1000, 50.00, 'Paid'),
-                (users_map['jane@vault716.com']['id'], 1001, 65.00, 'Unpaid'),
+                (users_map['jane@vault716.com']['id'], 1001, 70.00, 'Unpaid'),
                 (users_map['bob@vault716.com']['id'], 1002, 55.00, 'Paid'),
-                (users_map['alice@vault716.com']['id'], 1003, 70.00, 'Unpaid')
+                (users_map['alice@vault716.com']['id'], 1003, 75.00, 'Unpaid')
             ]
             db.executemany('''
                 INSERT INTO orders (user_id, order_number, amount_due, payment_status)
