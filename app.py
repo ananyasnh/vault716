@@ -54,7 +54,8 @@ class CursorWrapper:
         self.cur = cur
 
     def execute(self, query, args=()):
-        self.cur.execute(query, args)
+        q = adapt_query(query)
+        self.cur.execute(q, args)
         return self
 
     def fetchone(self):
@@ -906,6 +907,17 @@ def admin_delete_user(user_id):
     except Exception as e:
         db.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# -------------------------------------------------------------
+# DATABASE STATUS ENDPOINT (for live environment verification)
+# -------------------------------------------------------------
+@app.route('/api/db-status')
+def db_status():
+    return jsonify({
+        'using_postgres': USING_POSTGRES,
+        'has_database_url': bool(os.environ.get('DATABASE_URL')),
+        'database_url_prefix': os.environ.get('DATABASE_URL', '')[:20] if os.environ.get('DATABASE_URL') else None
+    }), 200
 
 # -------------------------------------------------------------
 # HEALTH CHECK ENDPOINT (used by keep-alive pinger)
