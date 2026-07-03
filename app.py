@@ -22,13 +22,97 @@ FROZEN_MEAL_CAP = 15
 WHATSAPP_LINK = 'https://chat.whatsapp.com/placeholder'
 
 # -------------------------------------------------------------
-# DATABASE CONNECTION HELPERS
+# DATABASE CONNECTION HELPERS (Supports SQLite & Postgres)
 # -------------------------------------------------------------
+USING_POSTGRES = False
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    try:
+        import psycopg2
+        import psycopg2.extras
+        USING_POSTGRES = True
+        print("DATABASE CONFIGURATION: Using cloud PostgreSQL database.")
+    except ImportError:
+        print("DATABASE CONFIGURATION: DATABASE_URL is set but psycopg2 is not installed. Falling back to local SQLite.")
+
+def adapt_query(query):
+    if USING_POSTGRES:
+        # Convert ? to %s for parameters
+        q = query.replace('?', '%s')
+        # Adapt auto-increment syntax for tables
+        q = q.replace('INTEGER PRIMARY KEY AUTOINCREMENT', 'SERIAL PRIMARY KEY')
+        # Replace TEXT DEFAULT CURRENT_TIMESTAMP with TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        q = q.replace('TEXT DEFAULT CURRENT_TIMESTAMP', 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        # Replace REAL with DOUBLE PRECISION
+        q = q.replace('REAL', 'DOUBLE PRECISION')
+        return q
+    return query
+
+class CursorWrapper:
+    def __init__(self, cur):
+        self.cur = cur
+
+    def execute(self, query, args=()):
+        self.cur.execute(query, args)
+        return self
+
+    def fetchone(self):
+        return self.cur.fetchone()
+
+    def fetchall(self):
+        return self.cur.fetchall()
+
+    def close(self):
+        self.cur.close()
+
+class DatabaseWrapper:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def execute(self, query, args=()):
+        q = adapt_query(query)
+        if USING_POSTGRES:
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(q, args)
+            return cur
+        else:
+            return self.conn.execute(q, args)
+
+    def executemany(self, query, args_list):
+        q = adapt_query(query)
+        if USING_POSTGRES:
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.executemany(q, args_list)
+            return cur
+        else:
+            return self.conn.executemany(q, args_list)
+
+    def cursor(self):
+        if USING_POSTGRES:
+            return CursorWrapper(self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor))
+        else:
+            return self.conn.cursor()
+
+    def commit(self):
+        self.conn.commit()
+
+    def rollback(self):
+        self.conn.rollback()
+
+    def close(self):
+        self.conn.close()
+
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        db.row_factory = sqlite3.Row
+        if USING_POSTGRES:
+            conn = psycopg2.connect(DATABASE_URL)
+            db = g._database = DatabaseWrapper(conn)
+        else:
+            conn = sqlite3.connect(DATABASE)
+            conn.row_factory = sqlite3.Row
+            db = g._database = DatabaseWrapper(conn)
     return db
 
 @app.teardown_appcontext
@@ -66,7 +150,7 @@ def init_db():
         # Migrate users if date_created column is missing
         try:
             db.execute("ALTER TABLE users ADD COLUMN date_created TEXT DEFAULT CURRENT_TIMESTAMP")
-        except sqlite3.OperationalError:
+        except Exception:
             pass
 
         # Create Orders table
@@ -555,13 +639,22 @@ def dashboard():
     formatted_start_date = None
     weeks_active = 0
     if start_date:
-        try:
-            dt = datetime.datetime.strptime(start_date.split('.')[0], '%Y-%m-%d %H:%M:%S')
+        if isinstance(start_date, datetime.datetime):
+            dt = start_date
+        else:
+            try:
+                # Remove timezone if present, then parse
+                dt_str = str(start_date).split('.')[0].split('+')[0]
+                dt = datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+            except Exception:
+                dt = None
+
+        if dt:
             formatted_start_date = dt.strftime('%B %d, %Y')
             delta = datetime.datetime.utcnow() - dt
             weeks_active = max(1, delta.days // 7 + 1)
-        except Exception:
-            formatted_start_date = start_date
+        else:
+            formatted_start_date = str(start_date)
             weeks_active = 1
 
     # Check if there is an active/unpaid order in the current week to show
