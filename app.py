@@ -147,11 +147,12 @@ def init_db():
                 date_created TEXT DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        # Migrate users if date_created column is missing
-        try:
-            db.execute("ALTER TABLE users ADD COLUMN date_created TEXT DEFAULT CURRENT_TIMESTAMP")
-        except Exception:
-            pass
+        # Migrate users if date_created column is missing (SQLite only)
+        if not USING_POSTGRES:
+            try:
+                db.execute("ALTER TABLE users ADD COLUMN date_created TEXT DEFAULT CURRENT_TIMESTAMP")
+            except Exception:
+                pass
 
         # Create Orders table
         db.execute('''
