@@ -547,16 +547,22 @@ def dashboard():
     pickups_row = query_db("SELECT COUNT(*) as count FROM orders WHERE user_id = ? AND payment_status = 'Paid'", (user['id'],), one=True)
     pickup_count = pickups_row['count'] if pickups_row else 0
 
-    # Format membership start date
+    # Determine if user has an active plan (has a plan_tier set and status is Active)
+    has_plan = bool(user['plan_tier'] and user['current_status'] == 'Active')
+
+    # Format membership start date & calculate weeks active
     start_date = user.get('date_created') if 'date_created' in user.keys() else None
+    formatted_start_date = None
+    weeks_active = 0
     if start_date:
         try:
             dt = datetime.datetime.strptime(start_date.split('.')[0], '%Y-%m-%d %H:%M:%S')
             formatted_start_date = dt.strftime('%B %d, %Y')
+            delta = datetime.datetime.utcnow() - dt
+            weeks_active = max(1, delta.days // 7 + 1)
         except Exception:
             formatted_start_date = start_date
-    else:
-        formatted_start_date = "June 30, 2026"
+            weeks_active = 1
 
     # Check if there is an active/unpaid order in the current week to show
     recent_order = query_db("""
@@ -569,8 +575,8 @@ def dashboard():
     simulate_week = request.args.get('simulate_week')
     menu, week_number = get_current_menu(simulate_week)
     
-    # Calculate amount due for next checkout
-    weekly_cost = calculate_amount(user['plan_tier'], user['protein_upgrade'])
+    # Calculate amount due for next checkout (only meaningful if plan exists)
+    weekly_cost = calculate_amount(user['plan_tier'], user['protein_upgrade']) if user['plan_tier'] else 0.0
     
     # Spots limit details
     active_hot = get_active_hot_subscribers()
@@ -580,6 +586,7 @@ def dashboard():
     return render_template(
         'dashboard.html',
         user=user,
+        has_plan=has_plan,
         recent_order=recent_order,
         menu=menu,
         week_number=week_number,
@@ -587,7 +594,8 @@ def dashboard():
         hot_spots_full=hot_spots_full,
         spots_remaining=spots_remaining,
         pickup_count=pickup_count,
-        formatted_start_date=formatted_start_date
+        formatted_start_date=formatted_start_date,
+        weeks_active=weeks_active
     )
 
 @app.route('/update-plan', methods=['POST'])
