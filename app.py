@@ -1,6 +1,9 @@
 import os
 import sqlite3
 import datetime
+import threading
+import time
+import urllib.request
 from datetime import timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, g
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -801,6 +804,32 @@ def admin_delete_user(user_id):
     except Exception as e:
         db.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# -------------------------------------------------------------
+# HEALTH CHECK ENDPOINT (used by keep-alive pinger)
+# -------------------------------------------------------------
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
+# -------------------------------------------------------------
+# KEEP-ALIVE SELF-PINGER  (prevents Render free-tier cold starts)
+# Pings /health every 4.5 minutes so the instance never sleeps.
+# -------------------------------------------------------------
+def _keep_alive():
+    # Wait 30s after startup before first ping so the server is ready
+    time.sleep(30)
+    base_url = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:5000')
+    url = base_url.rstrip('/') + '/health'
+    while True:
+        try:
+            urllib.request.urlopen(url, timeout=10)
+        except Exception:
+            pass  # silently ignore network hiccups
+        time.sleep(270)  # 4.5 minutes
+
+_pinger = threading.Thread(target=_keep_alive, daemon=True)
+_pinger.start()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
