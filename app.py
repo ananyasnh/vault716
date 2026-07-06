@@ -1,4 +1,5 @@
 import os
+import random
 import sqlite3
 import datetime
 import threading
@@ -483,6 +484,9 @@ def register():
             return render_template('register.html')
             
     return render_template('register.html')
+
+def generate_order_number():
+    return random.randint(100000, 999999)
 
 @app.route('/checkout/<tier_type>', methods=['GET', 'POST'])
 def checkout(tier_type):
