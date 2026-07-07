@@ -206,7 +206,7 @@
                 <div id="current-week-menu-panel">
                     <!-- Gourmet Masonry/Grid Menu Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {% for item in menu.items %}
+                        {% for item in menu['items'] %}
                         <!-- Image Mapping -->
                         {% set img_url = "" %}
                         {% if menu.name == "Menu A" %}
@@ -272,7 +272,7 @@
                     <!-- Weeks Content -->
                     {% for wk in all_weeks %}
                     <div id="db-wk-content-{{ wk.num }}" class="{% if wk.num != 1 %}hidden{% endif %} grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {% for item in wk.items %}
+                        {% for item in wk['items'] %}
                         <div class="rounded-2xl border border-neutral-900 bg-neutral-950/60 p-4 flex flex-col justify-between hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
                             <div>
                                 <!-- Gourmet Culinary Image Placeholder -->
@@ -374,7 +374,7 @@
                             Subscription Paused
                         </button>
                     {% else %}
-                        <a href="{{ url_for('checkout') }}" class="block w-full text-center py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-widest rounded-xl btn-glow transition-all font-display">
+                        <a href="{{ whatsapp_link }}" target="_blank" class="block w-full text-center py-3.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-widest rounded-xl btn-glow transition-all font-display">
                             Secure Weekly Prep
                         </a>
                         <p class="text-[9px] text-neutral-500 uppercase tracking-wider text-center">Receipt locks reservation parameters</p>
