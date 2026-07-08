@@ -445,14 +445,16 @@ def register():
         
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
+        name = request.form.get('name', '').strip()
         password = request.form.get('password', '')
         phone = request.form.get('phone', '').strip()
         
         if not email or not password or not phone:
-            flash("All fields are required.", "error")
+            flash("Email, password, and phone are required.", "error")
             return render_template('register.html')
             
-        name = email.split('@')[0].capitalize()
+        if not name:
+            name = email.split('@')[0].capitalize()
             
         db = get_db()
         cursor = db.cursor()
