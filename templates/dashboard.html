@@ -208,22 +208,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         {% for item in menu['items'] %}
                         <!-- Image Mapping -->
-                        {% set img_url = "" %}
-                        {% if menu.name == "Menu A" %}
-                            {% if item.day == "Monday" %}{% set img_url = "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Tuesday" %}{% set img_url = "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Wednesday" %}{% set img_url = "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Thursday" %}{% set img_url = "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Friday" %}{% set img_url = "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop" %}
-                            {% endif %}
-                        {% else %}
-                            {% if item.day == "Monday" %}{% set img_url = "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Tuesday" %}{% set img_url = "https://images.unsplash.com/photo-1534939561126-855b8675edd7?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Wednesday" %}{% set img_url = "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Thursday" %}{% set img_url = "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600&auto=format&fit=crop" %}
-                            {% elif item.day == "Friday" %}{% set img_url = "https://images.unsplash.com/photo-1541832676-9b763b0239ab?w=600&auto=format&fit=crop" %}
-                            {% endif %}
-                        {% endif %}
+                        {% set img_url = "/static/images/" ~ (item.meal | lower | replace(' ', '_') | replace('&', 'and') | replace("'", "")) ~ ".jpg" %}
                         
                         <div class="rounded-2xl border border-neutral-900 bg-neutral-950/60 p-4 flex flex-col justify-between hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all duration-300">
                             <div>
@@ -277,7 +262,8 @@
                             <div>
                                 <!-- Gourmet Culinary Image Placeholder -->
                                 <div class="bg-neutral-900 border border-neutral-800 rounded-xl h-44 w-full overflow-hidden mb-4 relative group flex items-center justify-center">
-                                    <img src="{{ item.img }}" alt="{{ item.meal }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                    {% set img_url = "/static/images/" ~ (item.meal | lower | replace(' ', '_') | replace('&', 'and') | replace("'", "")) ~ ".jpg" %}
+                                    <img src="{{ img_url }}" alt="{{ item.meal }}" class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
                                     <div class="absolute inset-0 bg-gradient-to-t from-neutral-950/65 to-transparent"></div>
                                     <span class="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-wider text-amber-400 bg-neutral-950/90 py-1 px-2.5 rounded-lg border border-neutral-800">{{ item.day }}</span>
                                 </div>
@@ -434,6 +420,9 @@
                         <p class="text-[10px] text-neutral-500 mt-1.5 leading-relaxed">Holds your billing cycle and opens your Hot Tier slot to waitlisted accounts.</p>
                     </div>
 
+                    <div id="dynamic-price-display" class="w-full text-center py-2 text-amber-500 font-bold text-xs uppercase tracking-widest font-display">
+                        $0.00 Due on Monday
+                    </div>
                     <button type="submit" class="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-xs uppercase tracking-widest rounded-xl transition-colors border border-neutral-800 font-display">
                         Confirm Changes
                     </button>
@@ -534,5 +523,25 @@
         const activeBtn = document.getElementById(`db-wk-btn-${weekNum}`);
         activeBtn.className = "px-3.5 py-1.5 rounded-xl border text-[9px] font-bold uppercase tracking-wider transition-all bg-amber-500/10 text-amber-400 border-amber-500/35";
     }
+
+    function updateDynamicPrice() {
+        const tier = document.querySelector('input[name="plan_tier"]:checked');
+        const upgrade = document.getElementById('upgrade-checkbox').checked;
+        const priceDisplay = document.getElementById('dynamic-price-display');
+        
+        if (tier && priceDisplay) {
+            let price = tier.value === 'Hot' ? 50 : 55;
+            if (upgrade) price += 20;
+            priceDisplay.innerText = `$${price}.00 Due on Monday`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const radios = document.querySelectorAll('input[name="plan_tier"]');
+        radios.forEach(r => r.addEventListener('change', updateDynamicPrice));
+        const upgradeCheckbox = document.getElementById('upgrade-checkbox');
+        if (upgradeCheckbox) upgradeCheckbox.addEventListener('change', updateDynamicPrice);
+        updateDynamicPrice();
+    });
 </script>
 {% endblock %}
