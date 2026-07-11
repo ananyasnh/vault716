@@ -291,11 +291,11 @@ def get_current_menu(simulate_week=None):
         'name': 'Menu B',
         'week_type': 'Even Week',
         'items': [
-            {'day': 'Monday', 'meal': 'Mediterranean Bowl'},
+            {'day': 'Monday', 'meal': 'Butter Chicken with White Basmati Rice'},
             {'day': 'Tuesday', 'meal': 'White Pasta'},
             {'day': 'Wednesday', 'meal': 'Stir Fry Ginger-Garlic Chicken'},
             {'day': 'Thursday', 'meal': 'Crispy Chicken Tenders'},
-            {'day': 'Friday', 'meal': 'Chicken Caesar Wrap'}
+            {'day': 'Friday', 'meal': 'Mediterranean Bowl'}
         ]
     }
 
@@ -355,12 +355,12 @@ def get_detailed_menus():
     week_24 = [
         {
             'day': 'Monday',
-            'meal': 'Mediterranean Bowl',
-            'description': 'Mediterranean bowl served with grilled chicken bites, chickpea salad, hummus, and Tzatziki cucumber salad.',
-            'sides': 'Grilled chicken bites, chickpea salad, hummus, and Tzatziki cucumber salad.',
-            'std': {'cal': 600, 'protein': 43, 'carbs': 64, 'fat': 10, 'base': '5oz chicken, standard Mediterranean bowl'},
-            'gym': {'cal': 690, 'protein': 69, 'carbs': 48, 'fat': 12, 'base': '8oz chicken, extra chickpea salad and greens'},
-            'fallback_img': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60'
+            'meal': 'Butter Chicken with White Basmati Rice',
+            'description': 'Rich and creamy butter chicken served with fluffy white basmati rice.',
+            'sides': 'White basmati rice.',
+            'std': {'cal': 680, 'protein': 45, 'carbs': 70, 'fat': 18, 'base': '5oz chicken, standard basmati rice'},
+            'gym': {'cal': 820, 'protein': 70, 'carbs': 60, 'fat': 22, 'base': '8oz chicken, scaled basmati rice'},
+            'fallback_img': 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=600&auto=format&fit=crop&q=60'
         },
         {
             'day': 'Tuesday',
@@ -391,12 +391,12 @@ def get_detailed_menus():
         },
         {
             'day': 'Friday',
-            'meal': 'Chicken Caesar Wrap',
-            'description': 'Chicken Caesar wrap served in a warm flour tortilla.',
-            'sides': 'Chicken Caesar wrap.',
-            'std': {'cal': 630, 'protein': 42, 'carbs': 78, 'fat': 9, 'base': 'Standard chicken wrap'},
-            'gym': {'cal': 720, 'protein': 68, 'carbs': 62, 'fat': 11, 'base': 'Double chicken Caesar wrap'},
-            'fallback_img': 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=600&auto=format&fit=crop&q=60'
+            'meal': 'Mediterranean Bowl',
+            'description': 'Mediterranean bowl served with grilled chicken bites, chickpea salad, hummus, and Tzatziki cucumber salad.',
+            'sides': 'Grilled chicken bites, chickpea salad, hummus, and Tzatziki cucumber salad.',
+            'std': {'cal': 600, 'protein': 43, 'carbs': 64, 'fat': 10, 'base': '5oz chicken, standard Mediterranean bowl'},
+            'gym': {'cal': 690, 'protein': 69, 'carbs': 48, 'fat': 12, 'base': '8oz chicken, extra chickpea salad and greens'},
+            'fallback_img': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60'
         }
     ]
 

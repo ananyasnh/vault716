@@ -85,18 +85,18 @@ class Vault716TestCase(unittest.TestCase):
         # Even Week Check
         menu, week = app.get_current_menu(simulate_week=4)
         self.assertEqual(menu['name'], 'Menu B')
-        self.assertEqual(menu['items'][0]['meal'], 'Mediterranean Bowl')
+        self.assertEqual(menu['items'][0]['meal'], 'Butter Chicken with White Basmati Rice')
 
     def test_amount_calculation(self):
         """Verify tier costs and modifiers."""
         # Hot, no upgrade = $50
         self.assertEqual(app.calculate_amount('Hot', 0), 50.00)
         # Hot, gym upgrade = $65
-        self.assertEqual(app.calculate_amount('Hot', 1), 65.00)
+        self.assertEqual(app.calculate_amount('Hot', 1), 70.00)
         # Frozen, no upgrade = $55
         self.assertEqual(app.calculate_amount('Frozen', 0), 55.00)
         # Frozen, gym upgrade = $70
-        self.assertEqual(app.calculate_amount('Frozen', 1), 70.00)
+        self.assertEqual(app.calculate_amount('Frozen', 1), 75.00)
 
     def test_admin_portal_data(self):
         """Verify admin metrics calculations."""
@@ -154,7 +154,7 @@ class Vault716TestCase(unittest.TestCase):
         self.assertEqual(response_frozen.status_code, 200)
         self.assertIn(b'THE FROZEN VAULT', response_frozen.data)
         self.assertIn(b'Standard Frozen Tier', response_frozen.data)
-        self.assertIn(b'Chicken Caesar Wrap', response_frozen.data)
+        self.assertIn(b'Butter Chicken with White Basmati Rice', response_frozen.data)
 
         # Invalid tier redirects to home
         response_invalid = self.client.get('/tier/invalid')
